@@ -495,7 +495,7 @@ app = Flask(__name__)
 # Scoped CORS — override with CORS_ORIGINS env (comma-separated)
 _CORS_ORIGINS = [o.strip() for o in os.environ.get(
     "CORS_ORIGINS",
-    "https://lightcoach.win,http://localhost:8188,http://127.0.0.1:8188"
+    "https://lightcoach.win,https://www.lightcoach.win,https://lightcoach-production.up.railway.app,http://localhost:8188,http://127.0.0.1:8188"
 ).split(",") if o.strip()]
 CORS(app, origins=_CORS_ORIGINS)
 
