@@ -1,0 +1,2892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LightCoach — Learn to Trade</title>
+<style>
+  :root {
+    --bg: #0d1828;
+    --card: #122236;
+    --card2: #182d44;
+    --card3: #1f3552;
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.12);
+    --cyan-glow: rgba(0,212,255,0.25);
+    --green: #00e4a8;
+    --green-dim: rgba(0,228,168,0.12);
+    --red: #ff4757;
+    --red-dim: rgba(255,71,87,0.12);
+    --gold: #ffd700;
+    --gold2: #ffb800;
+    --gold-dim: rgba(255,215,0,0.12);
+    --gold-glow: rgba(255,215,0,0.3);
+    --purple: #a855f7;
+    --text: #f0f4ff;
+    --text2: #c8d3e8;
+    --sub: #6b7a96;
+    --sub2: #8a97b2;
+    --border: #1c2a42;
+    --border2: #253550;
+    --accent: #1a3a5c;
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset;
+    --shadow-hover: 0 8px 32px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05) inset;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 20px;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ========== ONBOARDING ========== */
+  #onboarding {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 24px 120px;
+    background: radial-gradient(ellipse at top, #0d1f3a 0%, #080d1a 70%);
+    min-height: 100vh;
+  }
+  .ob-logo {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    margin-top: 32px;
+    background: linear-gradient(135deg, var(--cyan), #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .ob-tagline {
+    font-size: 20px;
+    color: var(--sub);
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .ob-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px 32px;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .ob-step { display: none; }
+  .ob-step.active { display: block; }
+  .ob-step-indicator {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    justify-content: center;
+  }
+  .ob-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .ob-dot.active { background: var(--cyan); }
+  .ob-dot.done { background: var(--green); }
+  .ob-title {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .ob-sub {
+    font-size: 20px;
+    color: var(--sub);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+  .exp-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .exp-btn {
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+  .exp-btn:hover, .exp-btn.selected {
+    border-color: var(--cyan);
+    background: rgba(0,212,255,0.1);
+  }
+  .exp-btn .exp-label {
+    font-size: 22px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .exp-btn .exp-desc {
+    font-size: 18px;
+    color: var(--sub);
+  }
+
+  /* Goal sliders */
+  .goal-rows { display: flex; flex-direction: column; gap: 22px; }
+  .goal-row {}
+  .goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .goal-name { font-size: 20px; font-weight: 700; }
+  .goal-pct {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cyan);
+    min-width: 56px;
+    text-align: right;
+  }
+  .goal-desc { font-size: 18px; color: var(--sub); margin-bottom: 10px; }
+  input[type=range] {
+    width: 100%;
+    height: 8px;
+    -webkit-appearance: none;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,212,255,0.6);
+    cursor: pointer;
+  }
+  .goal-total {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 20px;
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--card2);
+  }
+  .goal-total.ok { color: var(--green); }
+  .goal-total.over { color: var(--red); }
+
+  /* Amount inputs */
+  .amount-wrap { position: relative; margin-bottom: 24px; }
+  .amount-prefix {
+    position: absolute;
+    left: 18px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--sub);
+    pointer-events: none;
+  }
+  .amount-input {
+    width: 100%;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 20px 20px 46px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .amount-input:focus { border-color: var(--cyan); }
+  .amount-hint { font-size: 18px; color: var(--sub); margin-top: 10px; }
+  .quick-amounts {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .quick-amt {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--sub);
+    transition: all 0.2s;
+  }
+  .quick-amt:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* Confirm step */
+  .confirm-rows { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+  .confirm-row {
+    display: flex;
+    justify-content: space-between;
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    align-items: center;
+  }
+  .confirm-label { font-size: 18px; color: var(--sub); }
+  .confirm-val { font-size: 22px; font-weight: 700; color: var(--cyan); }
+
+  /* Pinned onboarding Next button */
+  .ob-btn-fixed {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 16px 24px 28px;
+    background: linear-gradient(to top, #080d1a 70%, transparent);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ob-btn-fixed .btn-primary,
+  .ob-btn-fixed .btn-secondary {
+    max-width: 560px;
+    width: 100%;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--cyan), #0090c0);
+    color: #000;
+    font-size: 22px;
+    font-weight: 800;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 32px;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-save-note {
+    background: rgba(0,212,255,0.15);
+    color: var(--cyan);
+    font-size: 20px;
+    font-weight: 700;
+    border: 1px solid rgba(0,212,255,0.35);
+    border-radius: 12px;
+    padding: 14px 36px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-save-note:hover { background: rgba(0,212,255,0.25); transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--card2);
+    color: var(--sub);
+    font-size: 20px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .btn-secondary:hover { border-color: var(--sub); color: var(--text); }
+
+  /* ========== DISCLAIMER BAR ========== */
+  .disclaimer-bar {
+    background: rgba(120,53,15,0.85);
+    color: #fde68a;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    padding: 7px 16px;
+    flex-shrink: 0;
+    letter-spacing: 0.01em;
+    border-bottom: 1px solid rgba(251,191,36,0.2);
+  }
+
+  /* ========== HELP BUTTON ========== */
+  .help-btn {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.35);
+    color: var(--cyan);
+    font-size: 17px;
+    font-weight: 700;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: all 0.2s;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+  .help-btn:hover { background: var(--cyan-dim); box-shadow: 0 0 0 1px rgba(0,212,255,0.5); }
+
+  /* ========== HELP MODAL ========== */
+  .help-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .help-overlay.open { display: flex; }
+  .help-modal {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .help-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .help-modal-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .help-close {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--sub);
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .help-close:hover { color: var(--text); }
+  .help-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .help-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .help-section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+  .help-section-body {
+    font-size: 19px;
+    color: var(--text2);
+    line-height: 1.55;
+  }
+  .help-disclaimer {
+    background: rgba(120,53,15,0.4);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 17px;
+    color: #fde68a;
+    line-height: 1.5;
+    margin-top: 20px;
+  }
+
+  /* ========== MAIN APP ========== */
+  #app { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* Header */
+  .app-header {
+    background: rgba(13,20,38,0.98);
+    border-bottom: 1px solid var(--border2);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  }
+  .header-logo {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--cyan) 0%, #7eb8ff 50%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 8px var(--cyan-glow));
+  }
+  .account-switcher {
+    display: flex;
+    gap: 4px;
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid var(--border2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) inset;
+  }
+  .acct-btn {
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    padding: 8px 16px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--sub);
+    transition: all 0.2s;
+  }
+  .acct-btn:hover { color: var(--text2); }
+  .acct-btn.active {
+    background: linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,144,192,0.12));
+    color: var(--cyan);
+    box-shadow: 0 0 0 1px rgba(0,212,255,0.3), 0 2px 8px rgba(0,212,255,0.15);
+  }
+  .acct-btn.dream.active {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,184,0,0.12));
+    color: var(--gold);
+    box-shadow: 0 0 0 1px rgba(255,215,0,0.4), 0 2px 8px rgba(255,215,0,0.2);
+  }
+
+  /* Portfolio Banner */
+  .portfolio-banner {
+    padding: 14px 20px 12px;
+    background: linear-gradient(180deg, #0e1f3e 0%, #0a1628 60%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border2);
+    transition: background 0.4s;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .portfolio-banner::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--cyan-dim) 0%, transparent 70%);
+    pointer-events: none;
+    transition: background 0.4s;
+  }
+  .portfolio-banner.dream-mode {
+    background: linear-gradient(180deg, #2c1e00 0%, #1a1200 60%, var(--bg) 100%);
+  }
+  .portfolio-banner.dream-mode::before {
+    background: radial-gradient(circle, var(--gold-dim) 0%, transparent 70%);
+  }
+  .banner-acct-label {
+    font-size: 18px;
+    color: var(--sub2);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.3px;
+  }
+  .acct-badge {
+    font-size: 13px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.1));
+    color: var(--cyan);
+    border: 1px solid rgba(0,212,255,0.3);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .acct-badge.dream {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,184,0,0.1));
+    color: var(--gold);
+    border-color: rgba(255,215,0,0.4);
+    box-shadow: 0 0 8px rgba(255,215,0,0.15);
+  }
+  .banner-value {
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .portfolio-banner.dream-mode .banner-value {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 50%, #fff5cc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(255,215,0,0.4));
+  }
+  .banner-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .banner-stat {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    min-width: 80px;
+  }
+  .banner-stat-label { font-size: 17px; color: var(--sub); line-height: 1; margin-bottom: 3px; }
+  .banner-stat-val { font-size: 20px; font-weight: 700; line-height: 1; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+
+  /* Rank bar in banner */
+  .rank-bar-wrap { margin-top: 4px; }
+  .rank-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .rank-label {
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text2);
+  }
+  .rank-next { font-size: 17px; color: var(--sub); }
+  .rank-progress-bg {
+    height: 8px;
+    background: var(--card2);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .rank-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    box-shadow: 0 0 8px var(--cyan-glow);
+    transition: width 0.6s ease;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    display: flex;
+    background: rgba(13,20,38,0.98);
+    border-bottom: 1px solid var(--border2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 13px 8px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--sub);
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+  }
+  .tab-btn:hover:not(.locked) { color: var(--text2); background: rgba(255,255,255,0.03); }
+  .tab-btn.active {
+    color: var(--cyan);
+    border-bottom-color: var(--cyan);
+    background: rgba(0,212,255,0.05);
+    text-shadow: 0 0 12px var(--cyan-glow);
+  }
+  .tab-btn.locked { opacity: 0.5; cursor: default; }
+
+  /* Tab panels */
+  .tab-panel { display: none; padding: 10px 20px; }
+  .tab-panel.active { display: block; flex: 1; overflow-y: auto; min-height: 0; }
+
+  /* Section headings */
+  .section-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border2) 0%, transparent 100%);
+    margin-left: 8px;
+  }
+
+  /* Holdings */
+  .holding-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-card);
+    border-left: 3px solid var(--border2);
+  }
+  .holding-card:hover {
+    border-color: var(--border2);
+    border-left-color: var(--cyan);
+    background: var(--card2);
+    transform: translateX(2px);
+    box-shadow: var(--shadow-hover);
+  }
+  .coin-img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .holding-info { flex: 1; }
+  .holding-name { font-size: 22px; font-weight: 700; color: var(--text); }
+  .holding-sub { font-size: 17px; color: var(--sub2); }
+  .holding-right { text-align: right; }
+  .holding-val { font-size: 21px; font-weight: 700; color: var(--text); }
+  .holding-pnl { font-size: 17px; font-weight: 600; }
+
+  /* Goals progress */
+  .goals-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 2px solid rgba(0,212,255,0.2);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-top: 8px;
+    box-shadow: var(--shadow-card);
+  }
+  .goals-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .goal-progress-row { margin-bottom: 8px; }
+  .goal-progress-row:last-child { margin-bottom: 0; }
+  .gp-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .gp-name { font-size: 19px; font-weight: 600; color: var(--text2); }
+  .gp-pct { font-size: 17px; color: var(--cyan); font-weight: 700; }
+  .gp-bar {
+    height: 8px;
+    background: var(--card3);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .gp-fill {
+    height: 100%;
+    border-radius: 4px;
+    box-shadow: 0 0 6px var(--cyan-glow);
+    transition: width 0.5s;
+  }
+
+  /* Achievements */
+  .achievements-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 2px solid rgba(255,215,0,0.2);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-top: 8px;
+    box-shadow: var(--shadow-card);
+  }
+  .achievements-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 7px;
+  }
+  .ach-badge {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ach-badge.earned {
+    background: linear-gradient(145deg, rgba(255,215,0,0.12) 0%, rgba(255,184,0,0.06) 100%);
+    border-color: rgba(255,215,0,0.5);
+    box-shadow: 0 0 14px rgba(255,215,0,0.2), 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .ach-badge.earned::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.12), transparent);
+    transform: skewX(-20deg);
+    animation: badgeShine 4s ease-in-out infinite;
+  }
+  @keyframes badgeShine {
+    0%, 60%, 100% { left: -100%; }
+    40% { left: 140%; }
+  }
+  .ach-badge.locked {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+  .ach-icon { font-size: 24px; margin-bottom: 3px; display: block; }
+  .ach-name { font-size: 17px; font-weight: 700; line-height: 1.15; color: var(--text2); }
+  .ach-desc { display: none; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 16px 20px;
+    color: var(--sub);
+  }
+  .empty-icon { font-size: 38px; margin-bottom: 8px; }
+  .empty-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .empty-desc { font-size: 20px; color: var(--sub2); }
+
+  /* Markets */
+  .market-search {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-size: 20px;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) inset;
+  }
+  .market-search:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-dim), 0 2px 8px rgba(0,0,0,0.3) inset; }
+  .market-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-card);
+  }
+  .market-row:hover { border-color: var(--border2); background: var(--card2); transform: translateX(2px); box-shadow: var(--shadow-hover); }
+  .market-rank { font-size: 17px; color: var(--sub); min-width: 28px; }
+  .market-img { width: 38px; height: 38px; border-radius: 50%; }
+  .market-info { flex: 1; }
+  .market-name { font-size: 21px; font-weight: 700; color: var(--text); }
+  .market-symbol { font-size: 17px; color: var(--sub2); text-transform: uppercase; }
+  .market-right { text-align: right; }
+  .market-price { font-size: 21px; font-weight: 700; color: var(--text); }
+  .market-change { font-size: 17px; font-weight: 600; }
+
+  /* Trade tab */
+  .trade-search {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-size: 20px;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) inset;
+  }
+  .trade-search:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-dim), 0 2px 8px rgba(0,0,0,0.3) inset; }
+  .trade-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-card);
+    border-left: 3px solid var(--border2);
+  }
+  .trade-row:hover { border-color: var(--border2); border-left-color: var(--green); background: var(--card2); transform: translateX(2px); }
+
+  /* Trade Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .trade-modal {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 40px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-coin {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .modal-coin img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .modal-coin-name { font-size: 26px; font-weight: 800; color: var(--text); }
+  .modal-coin-price { font-size: 20px; color: var(--sub2); }
+  .modal-close {
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--sub);
+    transition: all 0.2s;
+  }
+  .modal-close:hover { color: var(--text); border-color: var(--sub); }
+  .trade-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .trade-tab {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--card2);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--sub);
+    transition: all 0.2s;
+  }
+  .trade-tab.active-buy { border-color: var(--green); color: var(--green); background: rgba(0,208,156,0.1); }
+  .trade-tab.active-sell { border-color: var(--red); color: var(--red); background: rgba(255,68,68,0.1); }
+  .modal-balance {
+    font-size: 18px;
+    color: var(--sub);
+    margin-bottom: 14px;
+  }
+  .modal-balance span { color: var(--text); font-weight: 700; }
+  .modal-input-wrap { position: relative; margin-bottom: 14px; }
+  .modal-input-prefix {
+    position: absolute;
+    left: 16px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--sub);
+    pointer-events: none;
+  }
+  .modal-input {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 16px 16px 16px 40px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) inset;
+  }
+  .modal-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-dim), 0 2px 8px rgba(0,0,0,0.3) inset; }
+  .quick-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .quick-btn {
+    flex: 1;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--sub2);
+    transition: all 0.2s;
+  }
+  .quick-btn:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+  .modal-preview {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 20px;
+    line-height: 1.8;
+  }
+  .preview-label { color: var(--sub2); }
+  .modal-execute {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    font-size: 22px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .modal-execute.buy { background: var(--green); color: #000; }
+  .modal-execute.sell { background: var(--red); color: #fff; }
+  .modal-execute:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Notebook */
+  .note-input-area {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 16px 18px;
+    font-size: 20px;
+    color: var(--text);
+    outline: none;
+    resize: none;
+    min-height: 130px;
+    font-family: inherit;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) inset;
+  }
+  .note-input-area:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-dim), 0 2px 8px rgba(0,0,0,0.3) inset; }
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 8px;
+    position: relative;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s;
+  }
+  .note-card:hover { background: var(--card2); box-shadow: var(--shadow-hover); }
+  .note-text { font-size: 20px; line-height: 1.6; white-space: pre-wrap; padding-right: 40px; color: var(--text2); }
+  .note-time { font-size: 17px; color: var(--sub); margin-top: 8px; }
+  .note-delete {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--sub);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .note-delete:hover { color: var(--red); }
+
+  /* Coach tab */
+  /* ===== COACH GATE ===== */
+  .coach-gate {
+    text-align: center;
+    padding: 24px 20px 20px;
+  }
+  .coach-icon {
+    font-size: 52px;
+    margin-bottom: 10px;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));
+  }
+  .coach-title {
+    font-size: 34px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--purple), #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .coach-desc { font-size: 20px; color: var(--sub2); line-height: 1.4; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .coach-wallet-badge {
+    display: inline-block;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 16px;
+    color: var(--sub);
+    margin-bottom: 18px;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+  }
+  .coach-pay-box {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 14px 20px;
+    max-width: 360px;
+    margin: 0 auto 20px;
+  }
+  .coach-pay-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .coach-pay-row:last-child { border-bottom: none; }
+  .coach-pay-label { color: var(--sub2); }
+  .coach-pay-value { font-weight: 700; color: var(--text); }
+  .btn-coach-action {
+    background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-block;
+    box-shadow: 0 4px 20px rgba(168,85,247,0.35);
+    margin-bottom: 12px;
+    min-width: 240px;
+  }
+  .btn-coach-action:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(168,85,247,0.45); }
+  .btn-coach-action:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .coach-gate-note { font-size: 17px; color: var(--sub); }
+  .coach-loading { text-align: center; padding: 50px 20px; }
+  .coach-spinner { font-size: 40px; display: block; margin-bottom: 14px; animation: coachSpin 1.2s linear infinite; }
+  @keyframes coachSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ===== COACH CHAT ===== */
+  .coach-chat-wrap {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    min-height: 0;
+  }
+  .coach-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: var(--card2);
+    border-bottom: 1px solid var(--border2);
+    flex-shrink: 0;
+  }
+  .coach-chat-name { font-size: 22px; font-weight: 800; color: var(--text); }
+  .coach-chat-exp { font-size: 16px; color: var(--sub); }
+  .coach-messages {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 160px;
+  }
+  .coach-msg {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 20px;
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+  .coach-msg.from-user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .coach-msg.from-ai {
+    align-self: flex-start;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+  .coach-msg.typing { color: var(--sub); font-style: italic; }
+  .coach-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 10px 14px 14px;
+    background: var(--bg);
+    border-top: 1px solid var(--border2);
+    position: sticky;
+    bottom: 0;
+  }
+  .coach-input {
+    flex: 1;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 20px;
+    color: var(--text);
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+  }
+  .coach-input:focus { border-color: var(--purple); }
+  .coach-input::placeholder { color: var(--sub); }
+  .coach-send-btn {
+    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .coach-send-btn:hover:not(:disabled) { opacity: 0.9; }
+  .coach-send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 20px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    max-width: 90vw;
+    text-align: center;
+    backdrop-filter: blur(8px);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.rank-toast {
+    border-color: var(--gold);
+    background: rgba(28,18,0,0.97);
+    box-shadow: 0 8px 32px rgba(255,215,0,0.35);
+  }
+  .toast.ach-toast {
+    border-color: var(--purple);
+    background: rgba(18,8,28,0.97);
+    box-shadow: 0 8px 32px rgba(168,85,247,0.35);
+  }
+
+  /* Loading */
+  .loading-pulse {
+    background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s infinite;
+    border-radius: 8px;
+    height: 22px;
+    margin-bottom: 8px;
+  }
+  @keyframes pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Dream mode accents on cards */
+  .dream-active .holding-card:hover { border-left-color: var(--gold); }
+  .dream-active .note-card { border-left-color: var(--gold); }
+  .dream-active .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: var(--gold-dim); text-shadow: 0 0 12px var(--gold-glow); }
+  .dream-active .rank-progress-fill { background: linear-gradient(90deg, var(--gold2), var(--gold)); box-shadow: 0 0 8px var(--gold-glow); }
+  .dream-active .section-title { color: var(--gold); }
+  .dream-active .gp-pct { color: var(--gold); }
+  .dream-active .gp-fill { box-shadow: 0 0 6px var(--gold-glow); }
+  .dream-active .goals-card { border-top-color: rgba(255,215,0,0.3); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--sub); }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .ob-card { padding: 28px 20px; }
+    .ob-title { font-size: 28px; }
+    .banner-value { font-size: 42px; }
+    .section-title { font-size: 28px; }
+    .achievements-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- =================== ONBOARDING =================== -->
+<div id="onboarding">
+  <div class="ob-logo">⚡ LightCoach</div>
+  <div class="ob-tagline">Practice trading. Learn real strategies. No real money at risk.</div>
+
+  <div class="ob-card">
+    <div class="ob-step-indicator">
+      <div class="ob-dot active" id="dot1"></div>
+      <div class="ob-dot" id="dot2"></div>
+      <div class="ob-dot" id="dot3"></div>
+      <div class="ob-dot" id="dot4"></div>
+      <div class="ob-dot" id="dot5"></div>
+    </div>
+
+    <!-- Step 1: Experience -->
+    <div class="ob-step active" id="step1">
+      <div class="ob-title">What's your crypto experience?</div>
+      <div class="ob-sub">Be honest — this helps Coach teach you at the right level.</div>
+      <div class="exp-buttons">
+        <button class="exp-btn" onclick="selectExperience('none', this)">
+          <span class="exp-label">🐣 Never tried it</span>
+          <span class="exp-desc">Crypto is new to me — start from the basics</span>
+        </button>
+        <button class="exp-btn" onclick="selectExperience('some', this)">
+          <span class="exp-label">📈 A little bit</span>
+          <span class="exp-desc">I've bought some crypto but not sure what I'm doing</span>
+        </button>
+        <button class="exp-btn" onclick="selectExperience('experienced', this)">
+          <span class="exp-label">🚀 Experienced</span>
+          <span class="exp-desc">I trade regularly and understand the basics</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Goals -->
+    <div class="ob-step" id="step2">
+      <div class="ob-title">What are your trading goals?</div>
+      <div class="ob-sub">Drag the sliders to match how you want to invest. They must add up to 100%.</div>
+      <div class="goal-rows">
+        <div class="goal-row">
+          <div class="goal-header">
+            <span class="goal-name">🏦 HODL for the Long Run</span>
+            <span class="goal-pct" id="hodl-pct">25%</span>
+          </div>
+          <div class="goal-desc">Buy and hold for months or years</div>
+          <input type="range" min="0" max="100" value="25" id="slider-hodl" oninput="updateGoals('hodl')">
+        </div>
+        <div class="goal-row">
+          <div class="goal-header">
+            <span class="goal-name">⚡ Day Trading</span>
+            <span class="goal-pct" id="day-pct">25%</span>
+          </div>
+          <div class="goal-desc">Buy and sell within hours or days</div>
+          <input type="range" min="0" max="100" value="25" id="slider-day" oninput="updateGoals('day')">
+        </div>
+        <div class="goal-row">
+          <div class="goal-header">
+            <span class="goal-name">🌕 Moonshot Hunting</span>
+            <span class="goal-pct" id="moon-pct">25%</span>
+          </div>
+          <div class="goal-desc">Small caps and presales with huge upside</div>
+          <input type="range" min="0" max="100" value="25" id="slider-moon" oninput="updateGoals('moon')">
+        </div>
+        <div class="goal-row">
+          <div class="goal-header">
+            <span class="goal-name">🤔 Still Exploring</span>
+            <span class="goal-pct" id="explore-pct">25%</span>
+          </div>
+          <div class="goal-desc">Not sure yet — just learning</div>
+          <input type="range" min="0" max="100" value="25" id="slider-explore" oninput="updateGoals('explore')">
+        </div>
+      </div>
+      <div class="goal-total ok" id="goal-total">Total: 100% ✓</div>
+    </div>
+
+    <!-- Step 3: Primary Account -->
+    <div class="ob-step" id="step3">
+      <div class="ob-title">💼 Your Primary Account</div>
+      <div class="ob-sub">Enter the amount you actually have — or plan to invest — in real crypto. Your simulator matches this so the experience feels real.</div>
+      <div class="quick-amounts">
+        <button class="quick-amt" onclick="setObAmount('primary', 500)">$500</button>
+        <button class="quick-amt" onclick="setObAmount('primary', 1000)">$1,000</button>
+        <button class="quick-amt" onclick="setObAmount('primary', 5000)">$5,000</button>
+        <button class="quick-amt" onclick="setObAmount('primary', 10000)">$10,000</button>
+        <button class="quick-amt" onclick="setObAmount('primary', 25000)">$25,000</button>
+      </div>
+      <div class="amount-wrap">
+        <span class="amount-prefix">$</span>
+        <input class="amount-input" type="number" id="primary-amount" placeholder="0" min="1" oninput="checkPrimaryAmount()">
+      </div>
+      <div class="amount-hint">This is virtual money — no real funds are used.</div>
+    </div>
+
+    <!-- Step 4: Dream Account -->
+    <div class="ob-step" id="step4">
+      <div class="ob-title">✨ Your Dream Account</div>
+      <div class="ob-sub">This is pure fun money — pick any amount. Want to trade like a billionaire? Go for it. This account is separate so it doesn't affect your real practice.</div>
+      <div class="quick-amounts">
+        <button class="quick-amt" onclick="setObAmount('dream', 10000)">$10K</button>
+        <button class="quick-amt" onclick="setObAmount('dream', 100000)">$100K</button>
+        <button class="quick-amt" onclick="setObAmount('dream', 1000000)">$1M</button>
+        <button class="quick-amt" onclick="setObAmount('dream', 10000000)">$10M</button>
+        <button class="quick-amt" onclick="setObAmount('dream', 1000000000)">$1B 🤩</button>
+      </div>
+      <div class="amount-wrap">
+        <span class="amount-prefix">$</span>
+        <input class="amount-input" type="number" id="dream-amount" placeholder="0" min="1" oninput="checkDreamAmount()">
+      </div>
+      <div class="amount-hint">Dream big — this has zero impact on your Primary Account.</div>
+    </div>
+
+    <!-- Step 5: Confirm -->
+    <div class="ob-step" id="step5">
+      <div class="ob-title">🎉 You're all set!</div>
+      <div class="ob-sub">Here's what we've got for you:</div>
+      <div class="confirm-rows" id="confirm-rows"></div>
+    </div>
+
+  </div><!-- ob-card -->
+
+  <!-- Pinned bottom bar for onboarding navigation — always visible -->
+  <div class="ob-btn-fixed" id="ob-btn-fixed">
+    <button class="btn-primary" id="ob-next-btn" onclick="obNextClick()">Next →</button>
+    <button class="btn-secondary" id="ob-back-btn" onclick="obBackClick()" style="display:none">← Back</button>
+  </div>
+</div><!-- onboarding -->
+
+
+<!-- =================== MAIN APP =================== -->
+<div id="app">
+
+  <!-- Disclaimer Bar -->
+  <div class="disclaimer-bar">⚠️ For educational use only · Not financial advice · Virtual money only · No real funds used · Service may go down · No refunds</div>
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="header-logo">⚡ LightCoach</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="account-switcher">
+        <button class="acct-btn active" id="btn-primary-acct" onclick="switchAccount('primary')">💼 Primary</button>
+        <button class="acct-btn dream" id="btn-dream-acct" onclick="switchAccount('dream')">✨ Dream</button>
+      </div>
+      <button class="help-btn" onclick="openHelp()">ℹ️ How it works</button>
+    </div>
+  </div>
+
+  <!-- Portfolio Banner -->
+  <div class="portfolio-banner" id="portfolio-banner">
+    <div class="banner-acct-label">
+      Total Portfolio Value
+      <span class="acct-badge" id="banner-badge">Primary</span>
+    </div>
+    <div class="banner-value" id="banner-total">$0.00</div>
+    <div class="banner-meta">
+      <div class="banner-stat">
+        <div class="banner-stat-label">All-time P&amp;L</div>
+        <div class="banner-stat-val" id="banner-pnl">$0.00</div>
+      </div>
+      <div class="banner-stat">
+        <div class="banner-stat-label">Cash Available</div>
+        <div class="banner-stat-val" id="banner-cash">$0.00</div>
+      </div>
+      <div class="banner-stat">
+        <div class="banner-stat-label">Started With</div>
+        <div class="banner-stat-val" id="banner-start">$0.00</div>
+      </div>
+    </div>
+    <!-- Rank bar -->
+    <div class="rank-bar-wrap" id="rank-bar-wrap">
+      <div class="rank-header">
+        <div class="rank-label" id="rank-label">🐟 Guppy</div>
+        <div class="rank-next" id="rank-next">5 trades to Trader</div>
+      </div>
+      <div class="rank-progress-bg">
+        <div class="rank-progress-fill" id="rank-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+    <button class="tab-btn" onclick="showTab('markets', this)">🌐 Markets</button>
+    <button class="tab-btn" onclick="showTab('trade', this)">⚡ Trade</button>
+    <button class="tab-btn" onclick="showTab('notebook', this)">📓 Notes</button>
+    <button class="tab-btn locked" onclick="showTab('coach', this)">🎓 Coach 🔒</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="tab-panel active" id="panel-dashboard">
+    <div class="section-title">My Holdings</div>
+    <div id="holdings-list"></div>
+    <div class="goals-card">
+      <div class="goals-title">🎯 My Goals</div>
+      <div id="goals-display"></div>
+    </div>
+    <!-- Achievements -->
+    <div class="achievements-card">
+      <div class="achievements-title">🏅 Achievements</div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+  </div>
+
+  <!-- Markets -->
+  <div class="tab-panel" id="panel-markets">
+    <div class="section-title">Live Markets</div>
+    <input class="market-search" type="text" placeholder="🔍  Search coins..." oninput="filterMarkets(this.value)" id="market-search-input">
+    <div id="markets-list"></div>
+  </div>
+
+  <!-- Trade -->
+  <div class="tab-panel" id="panel-trade">
+    <div class="section-title">Trade Crypto</div>
+    <input class="trade-search" type="text" placeholder="🔍  Search to trade..." oninput="filterTrade(this.value)" id="trade-search-input">
+    <div id="trade-list"></div>
+  </div>
+
+  <!-- Notebook -->
+  <div class="tab-panel" id="panel-notebook">
+    <div class="section-title">📓 My Notebook</div>
+    <textarea class="note-input-area" id="note-input" placeholder="Write notes, ideas, strategies — anything you want to remember..."></textarea>
+    <button class="btn-save-note" onclick="saveNote()">💾 Save Note</button>
+    <br><br>
+    <div id="notes-list"></div>
+  </div>
+
+  <!-- Coach -->
+  <div class="tab-panel" id="panel-coach">
+
+    <!-- Loading -->
+    <div class="coach-loading" id="coach-loading" style="display:none">
+      <div class="coach-spinner">&#x26A1;</div>
+      <div id="coach-loading-text" style="font-size:20px;color:var(--sub)">Loading...</div>
+    </div>
+
+    <!-- Gate: connect wallet -->
+    <div class="coach-gate" id="coach-gate-connect">
+      <div class="coach-icon">&#x1F393;</div>
+      <div class="coach-title">Meet Coach</div>
+      <div class="coach-desc">Your personal AI trading coach, powered by Lightchain AI.</div>
+      <button class="btn-coach-action" onclick="coachConnectWallet()">&#x1F517; Connect Wallet</button>
+      <div class="coach-gate-note">Trust Wallet &#xB7; Lightchain network</div>
+    </div>
+
+    <!-- Gate: pay to subscribe -->
+    <div class="coach-gate" id="coach-gate-pay" style="display:none">
+      <div class="coach-icon">&#x1F393;</div>
+      <div class="coach-title">Subscribe to Coach</div>
+      <div class="coach-wallet-badge" id="coach-wallet-badge"></div>
+      <div class="coach-pay-box">
+        <div class="coach-pay-row">
+          <span class="coach-pay-label">Monthly access</span>
+          <span class="coach-pay-value">$1.00 USD</span>
+        </div>
+        <div class="coach-pay-row">
+          <span class="coach-pay-label">Pay in LCAI</span>
+          <span class="coach-pay-value" id="coach-pay-lcai-val">Loading...</span>
+        </div>
+      </div>
+      <button class="btn-coach-action" id="coach-pay-btn" onclick="coachPay()" disabled>&#x23F3; Loading price...</button>
+      <div class="coach-gate-note" id="coach-pay-note">30-day access &#xB7; Verified on-chain</div>
+    </div>
+
+    <!-- Chat interface -->
+    <div class="coach-chat-wrap" id="coach-chat-wrap" style="display:none">
+      <div class="coach-chat-header">
+        <div class="coach-chat-name">&#x1F393; LightCoach</div>
+        <div class="coach-chat-exp" id="coach-chat-exp"></div>
+      </div>
+      <div class="coach-messages" id="coach-messages"></div>
+      <div class="coach-input-row">
+        <textarea class="coach-input" id="coach-input"
+          placeholder="Ask anything about crypto strategy, charts, risk..."
+          rows="1"
+          oninput="coachInputAutosize(this)"
+          onkeydown="coachInputKey(event)"></textarea>
+        <button class="coach-send-btn" id="coach-send-btn" onclick="coachSend()">&#x279C;</button>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- app -->
+
+<!-- Help Modal -->
+<div class="help-overlay" id="help-modal" onclick="closeHelpOutside(event)">
+  <div class="help-modal">
+    <div class="help-modal-header">
+      <div class="help-modal-title">⚡ How LightCoach Works</div>
+      <button class="help-close" onclick="closeHelp()">✕</button>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">🎯 What is this?</div>
+      <div class="help-section-body">LightCoach is a <strong>paper trading simulator</strong> — you practice buying and selling real cryptocurrencies using virtual money. No real funds are ever used. It's designed to help you learn how crypto trading works before risking real money.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">💼 Primary vs ✨ Dream Accounts</div>
+      <div class="help-section-body"><strong>Primary Account</strong> — set to match your real investment amount so the experience feels realistic.<br><br><strong>Dream Account</strong> — unlimited play money. Trade like a billionaire with no consequences. Toggle between them at the top of the screen.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">📱 How to navigate</div>
+      <div class="help-section-body">
+        <strong>📊 Dashboard</strong> — Your portfolio, goals, and achievements.<br>
+        <strong>🌐 Markets</strong> — Browse live prices for 100+ coins.<br>
+        <strong>⚡ Trade</strong> — Search for a coin and tap it to buy or sell.<br>
+        <strong>📓 Notes</strong> — Write down strategies and trading ideas.<br>
+        <strong>🎓 Coach</strong> — AI trading coach. Subscribe with LCAI to unlock.
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">🛒 How to make your first trade</div>
+      <div class="help-section-body">1. Tap the <strong>⚡ Trade</strong> tab<br>2. Search for a coin (e.g. Bitcoin)<br>3. Tap the coin card<br>4. Enter an amount and tap <strong>Buy</strong><br>5. Your holdings will appear in the Dashboard</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">🏅 Ranks &amp; Achievements</div>
+      <div class="help-section-body">Make trades to level up from 🐟 Guppy → 📊 Trader → 🦈 Shark → 💰 Whale → 🌟 Legend. Unlock achievement badges for milestones like diversifying your portfolio or turning a profit.</div>
+    </div>
+
+    <div class="help-disclaimer">⚠️ <strong>Important:</strong> LightCoach is for educational purposes only. Nothing here is financial advice. All prices are real but all trades are simulated — no real money is ever used or at risk. The service may experience downtime. No refunds apply to any future paid features.</div>
+  </div>
+</div>
+
+<!-- Trade Modal -->
+<div class="modal-overlay" id="trade-modal">
+  <div class="trade-modal">
+    <div class="modal-header">
+      <div class="modal-coin">
+        <img src="" id="modal-img" alt="">
+        <div>
+          <div class="modal-coin-name" id="modal-name">Bitcoin</div>
+          <div class="modal-coin-price" id="modal-price">$0.00</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeTradeModal()">✕</button>
+    </div>
+    <div class="trade-tabs">
+      <button class="trade-tab active-buy" id="tab-buy" onclick="setTradeType('buy')">Buy</button>
+      <button class="trade-tab" id="tab-sell" onclick="setTradeType('sell')">Sell</button>
+    </div>
+    <div class="modal-balance" id="modal-balance-line">Cash: <span id="modal-cash-val">$0.00</span></div>
+    <div class="modal-input-wrap">
+      <span class="modal-input-prefix">$</span>
+      <input class="modal-input" type="number" id="modal-usd-input" placeholder="0.00" min="0" oninput="updatePreview()">
+    </div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="setQuickAmount(25)">25%</button>
+      <button class="quick-btn" onclick="setQuickAmount(50)">50%</button>
+      <button class="quick-btn" onclick="setQuickAmount(75)">75%</button>
+      <button class="quick-btn" onclick="setQuickAmount(100)">MAX</button>
+    </div>
+    <div class="modal-preview" id="modal-preview">
+      <span class="preview-label">You will receive:</span> —
+    </div>
+    <button class="modal-execute buy" id="modal-execute-btn" onclick="executeTrade()">Buy</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  try {
+    const { EthereumProvider } = await import('https://esm.sh/@walletconnect/ethereum-provider@2.17.3');
+    window.WCEthereumProvider = EthereumProvider;
+  } catch(e) { console.warn('WalletConnect unavailable:', e); }
+</script>
+
+<script>
+// ==================== DATA ====================
+let coins = [];
+let currentAccount = 'primary';
+let tradeModalCoinId = null;
+let tradeType = 'buy';
+
+const PROFILE_KEY  = 'lc_profile';
+const PRIMARY_KEY  = 'lc_primary';
+const DREAM_KEY    = 'lc_dream';
+const NOTES_KEY    = 'lc_notes';
+const ONBOARD_KEY  = 'lc_onboarded';
+const STATS_KEY    = 'lc_stats';
+const ACH_KEY      = 'lc_achievements';
+
+// ==================== RANKS ====================
+const RANKS = [
+  { name: '🐟 Guppy',    min: 0,   max: 4   },
+  { name: '📊 Trader',   min: 5,   max: 19  },
+  { name: '🦈 Shark',   min: 20,  max: 49  },
+  { name: '🌟 Legend',  min: 100, max: Infinity }
+];
+// Insert Whale between Shark and Legend
+const RANK_TIERS = [
+  { name: '🐟 Guppy',   min: 0,   next: 5   },
+  { name: '📊 Trader',  min: 5,   next: 20  },
+  { name: '🦈 Shark',  min: 20,  next: 50  },
+  { name: '💰 Whale',  min: 50,  next: 100 },
+  { name: '🌟 Legend', min: 100, next: null }
+];
+
+function getRankInfo(trades) {
+  let current = RANK_TIERS[0];
+  for (const tier of RANK_TIERS) {
+    if (trades >= tier.min) current = tier;
+  }
+  return current;
+}
+
+// ==================== ACHIEVEMENTS ====================
+const ACHIEVEMENT_DEFS = [
+  { id: 'first_trade',      icon: '🎯', name: 'First Trade',      desc: 'Make your first trade' },
+  { id: 'trades_5',         icon: '🔥', name: 'Warmed Up',        desc: '5 trades completed' },
+  { id: 'trades_10',        icon: '⚡', name: '10 Trades',        desc: '10 trades completed' },
+  { id: 'trades_25',        icon: '💪', name: '25 Trades',        desc: '25 trades completed' },
+  { id: 'trades_50',        icon: '🏆', name: '50 Trades',        desc: '50 trades completed' },
+  { id: 'trades_100',       icon: '🌟', name: 'Century Club',     desc: '100 trades completed' },
+  { id: 'diversified',      icon: '🌈', name: 'Diversified',      desc: 'Hold 5+ different coins' },
+  { id: 'moon_mission',     icon: '🚀', name: 'Moon Mission',     desc: 'A coin up 50%+ in your portfolio' },
+  { id: 'note_taker',       icon: '📓', name: 'Note Taker',       desc: '5+ notes saved' },
+  { id: 'dream_millionaire',icon: '✨', name: 'Dream Millionaire',desc: '$1M+ in Dream account' },
+  { id: 'in_the_green',     icon: '💰', name: 'In the Green',     desc: 'Primary portfolio profitable' }
+];
+
+function getStats() {
+  return JSON.parse(localStorage.getItem(STATS_KEY) || '{"totalTrades":0}');
+}
+function saveStats(s) {
+  localStorage.setItem(STATS_KEY, JSON.stringify(s));
+}
+function getAchievements() {
+  return JSON.parse(localStorage.getItem(ACH_KEY) || '[]');
+}
+function saveAchievements(a) {
+  localStorage.setItem(ACH_KEY, JSON.stringify(a));
+}
+
+function checkAchievements() {
+  const stats = getStats();
+  const earned = getAchievements();
+  const newlyEarned = [];
+
+  function earn(id) {
+    if (!earned.includes(id)) {
+      earned.push(id);
+      newlyEarned.push(id);
+    }
+  }
+
+  // Trade count achievements
+  if (stats.totalTrades >= 1)   earn('first_trade');
+  if (stats.totalTrades >= 5)   earn('trades_5');
+  if (stats.totalTrades >= 10)  earn('trades_10');
+  if (stats.totalTrades >= 25)  earn('trades_25');
+  if (stats.totalTrades >= 50)  earn('trades_50');
+  if (stats.totalTrades >= 100) earn('trades_100');
+
+  // Diversified: hold 5+ coins in primary
+  const primary = JSON.parse(localStorage.getItem(PRIMARY_KEY) || 'null');
+  if (primary && primary.holdings.length >= 5) earn('diversified');
+
+  // Moon Mission: any primary holding up 50%+
+  if (primary) {
+    primary.holdings.forEach(h => {
+      const c = getCoin(h.coinId);
+      if (c && h.avgBuyPrice > 0) {
+        const gain = (c.current_price - h.avgBuyPrice) / h.avgBuyPrice;
+        if (gain >= 0.5) earn('moon_mission');
+      }
+    });
+  }
+
+  // Note Taker: 5+ notes
+  const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+  if (notes.length >= 5) earn('note_taker');
+
+  // Dream Millionaire
+  const dream = JSON.parse(localStorage.getItem(DREAM_KEY) || 'null');
+  if (dream) {
+    let dTotal = dream.cash;
+    dream.holdings.forEach(h => {
+      const c = getCoin(h.coinId);
+      if (c) dTotal += c.current_price * h.amount;
+    });
+    if (dTotal >= 1000000) earn('dream_millionaire');
+  }
+
+  // In the Green: primary P&L > 0
+  if (primary) {
+    let pTotal = primary.cash;
+    primary.holdings.forEach(h => {
+      const c = getCoin(h.coinId);
+      if (c) pTotal += c.current_price * h.amount;
+    });
+    if (pTotal > primary.startAmount) earn('in_the_green');
+  }
+
+  saveAchievements(earned);
+
+  // Show toasts for newly earned
+  newlyEarned.forEach((id, i) => {
+    const def = ACHIEVEMENT_DEFS.find(d => d.id === id);
+    if (def) {
+      setTimeout(() => showToast(def.icon + ' Achievement unlocked: ' + def.name, 'ach'), i * 600);
+    }
+  });
+
+  return earned;
+}
+
+function renderAchievements() {
+  const earned = getAchievements();
+  const grid = document.getElementById('achievements-grid');
+  if (!grid) return;
+  grid.innerHTML = ACHIEVEMENT_DEFS.map(def => {
+    const isEarned = earned.includes(def.id);
+    return `<div class="ach-badge ${isEarned ? 'earned' : 'locked'}">
+      <div class="ach-icon">${def.icon}</div>
+      <div class="ach-name">${def.name}</div>
+      <div class="ach-desc">${def.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+// ==================== RANK DISPLAY ====================
+function updateRankDisplay() {
+  const stats = getStats();
+  const trades = stats.totalTrades;
+  const tier = getRankInfo(trades);
+  const labelEl = document.getElementById('rank-label');
+  const nextEl  = document.getElementById('rank-next');
+  const fillEl  = document.getElementById('rank-progress-fill');
+  if (!labelEl) return;
+
+  labelEl.textContent = tier.name;
+
+  if (tier.next === null) {
+    // Max rank
+    nextEl.textContent = 'Max rank reached!';
+    fillEl.style.width = '100%';
+  } else {
+    const remaining = tier.next - trades;
+    const nextTier = RANK_TIERS.find(t => t.min === tier.next);
+    nextEl.textContent = remaining + ' trade' + (remaining !== 1 ? 's' : '') + ' to ' + (nextTier ? nextTier.name.split(' ').slice(1).join(' ') : '');
+    const span = tier.next - tier.min;
+    const progress = trades - tier.min;
+    fillEl.style.width = Math.min(100, Math.round((progress / span) * 100)) + '%';
+  }
+}
+
+// ==================== STORAGE HELPERS ====================
+function getAccount() {
+  const key = currentAccount === 'primary' ? PRIMARY_KEY : DREAM_KEY;
+  return JSON.parse(localStorage.getItem(key) || 'null');
+}
+function saveAccount(data) {
+  const key = currentAccount === 'primary' ? PRIMARY_KEY : DREAM_KEY;
+  localStorage.setItem(key, JSON.stringify(data));
+}
+function getProfile() {
+  return JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+}
+function getNotes() {
+  return JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+}
+
+// ==================== ONBOARDING STATE ====================
+let obStep = 1;
+let obData = {
+  experience: null,
+  goals: { hodl: 25, day: 25, moon: 25, explore: 25 },
+  primaryAmount: 0,
+  dreamAmount: 0
+};
+
+function updateObButtons() {
+  const nextBtn = document.getElementById('ob-next-btn');
+  const backBtn = document.getElementById('ob-back-btn');
+
+  backBtn.style.display = obStep > 1 ? 'block' : 'none';
+
+  if (obStep === 5) {
+    nextBtn.textContent = '🚀 Start Trading!';
+    nextBtn.disabled = false;
+  } else {
+    nextBtn.textContent = 'Next →';
+    if (obStep === 1) nextBtn.disabled = !obData.experience;
+    else if (obStep === 2) nextBtn.disabled = (getGoalTotal() !== 100);
+    else if (obStep === 3) nextBtn.disabled = (obData.primaryAmount < 1);
+    else if (obStep === 4) nextBtn.disabled = (obData.dreamAmount < 1);
+    else nextBtn.disabled = false;
+  }
+}
+
+function obNextClick() {
+  if (obStep === 5) { finishOnboarding(); return; }
+  if (obStep === 1 && !obData.experience) { showToast('Please select your experience level'); return; }
+  if (obStep === 2 && getGoalTotal() !== 100) { showToast('Goals must add up to 100%'); return; }
+  if (obStep === 3 && obData.primaryAmount < 1) { showToast('Please enter an amount'); return; }
+  if (obStep === 4 && obData.dreamAmount < 1) { showToast('Please enter a dream amount'); return; }
+  goStep(obStep + 1);
+}
+
+function obBackClick() {
+  if (obStep > 1) goStep(obStep - 1);
+}
+
+function selectExperience(level, btn) {
+  obData.experience = level;
+  document.querySelectorAll('.exp-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  updateObButtons();
+  setTimeout(() => goStep(2), 300);
+}
+
+function goStep(n) {
+  obStep = n;
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('step' + i).classList.remove('active');
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+  document.getElementById('step' + n).classList.add('active');
+  if (n === 5) buildConfirmPage();
+  updateObButtons();
+  // Scroll top of onboarding area
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateGoals(changed) {
+  const keys = ['hodl', 'day', 'moon', 'explore'];
+  const vals = {};
+  keys.forEach(k => { vals[k] = parseInt(document.getElementById('slider-' + k).value); });
+
+  const total = keys.reduce((s, k) => s + vals[k], 0);
+  const el = document.getElementById('goal-total');
+  el.textContent = 'Total: ' + total + '%' + (total === 100 ? ' ✓' : ' (must equal 100%)');
+  el.className = 'goal-total ' + (total === 100 ? 'ok' : 'over');
+
+  keys.forEach(k => {
+    document.getElementById(k + '-pct').textContent = vals[k] + '%';
+    obData.goals[k] = vals[k];
+  });
+
+  updateObButtons();
+}
+
+function getGoalTotal() {
+  const keys = ['hodl', 'day', 'moon', 'explore'];
+  return keys.reduce((s, k) => s + parseInt(document.getElementById('slider-' + k).value), 0);
+}
+
+function setObAmount(type, val) {
+  const input = document.getElementById(type + '-amount');
+  input.value = val;
+  if (type === 'primary') checkPrimaryAmount();
+  else checkDreamAmount();
+}
+function checkPrimaryAmount() {
+  const v = parseFloat(document.getElementById('primary-amount').value);
+  obData.primaryAmount = isNaN(v) ? 0 : v;
+  updateObButtons();
+}
+function checkDreamAmount() {
+  const v = parseFloat(document.getElementById('dream-amount').value);
+  obData.dreamAmount = isNaN(v) ? 0 : v;
+  updateObButtons();
+}
+
+function buildConfirmPage() {
+  obData.primaryAmount = parseFloat(document.getElementById('primary-amount').value) || 0;
+  obData.dreamAmount = parseFloat(document.getElementById('dream-amount').value) || 0;
+  const expLabels = { none: '🐣 Never tried it', some: '📈 A little bit', experienced: '🚀 Experienced' };
+  const goalStr = obData.goals.hodl + '% HODL / ' + obData.goals.day + '% Day / ' + obData.goals.moon + '% Moon / ' + obData.goals.explore + '% Exploring';
+  document.getElementById('confirm-rows').innerHTML =
+    '<div class="confirm-row"><span class="confirm-label">Experience</span><span class="confirm-val">' + expLabels[obData.experience] + '</span></div>' +
+    '<div class="confirm-row"><span class="confirm-label">Goals</span><span class="confirm-val" style="font-size:18px">' + goalStr + '</span></div>' +
+    '<div class="confirm-row"><span class="confirm-label">Primary Account</span><span class="confirm-val">' + fmt(obData.primaryAmount) + '</span></div>' +
+    '<div class="confirm-row"><span class="confirm-label">Dream Account</span><span class="confirm-val" style="color:var(--gold)">' + fmt(obData.dreamAmount) + '</span></div>';
+}
+
+function finishOnboarding() {
+  const profile = {
+    experience: obData.experience,
+    goals: obData.goals,
+    primaryAmount: obData.primaryAmount,
+    dreamAmount: obData.dreamAmount
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  localStorage.setItem(PRIMARY_KEY, JSON.stringify({ cash: obData.primaryAmount, holdings: [], startAmount: obData.primaryAmount }));
+  localStorage.setItem(DREAM_KEY, JSON.stringify({ cash: obData.dreamAmount, holdings: [], startAmount: obData.dreamAmount }));
+  localStorage.setItem(NOTES_KEY, JSON.stringify([]));
+  localStorage.setItem(STATS_KEY, JSON.stringify({ totalTrades: 0 }));
+  localStorage.setItem(ACH_KEY, JSON.stringify([]));
+  localStorage.setItem(ONBOARD_KEY, 'true');
+  startApp();
+}
+
+// ==================== APP INIT ====================
+async function startApp() {
+  document.getElementById('onboarding').style.display = 'none';
+  const appEl = document.getElementById('app');
+  appEl.style.display = 'flex';
+  appEl.style.flexDirection = 'column';
+
+  // Migrate old cc_ keys to lc_ if needed
+  migrateOldData();
+
+  // Apply dream-active class on load if needed (currentAccount defaults to 'primary')
+  document.getElementById('app').classList.toggle('dream-active', currentAccount === 'dream');
+
+  updatePortfolioBanner();
+  updateRankDisplay();
+  renderGoals();
+  renderAchievements();
+  await loadCoins();
+  renderHoldings();
+  renderMarkets('');
+  renderTradeList('');
+  renderNotes();
+  setInterval(async () => {
+    await loadCoins();
+    updatePortfolioBanner();
+    renderHoldings();
+    const ms = document.getElementById('market-search-input').value;
+    renderMarkets(ms);
+    const ts = document.getElementById('trade-search-input').value;
+    renderTradeList(ts);
+  }, 60000);
+}
+
+function migrateOldData() {
+  // One-time migration from v1 cc_ keys to lc_ keys
+  const migrated = localStorage.getItem('lc_migrated');
+  if (migrated) return;
+  const map = [
+    ['cc_profile', PROFILE_KEY],
+    ['cc_primary', PRIMARY_KEY],
+    ['cc_dream',   DREAM_KEY],
+    ['cc_notes',   NOTES_KEY]
+  ];
+  map.forEach(([oldKey, newKey]) => {
+    const val = localStorage.getItem(oldKey);
+    if (val && !localStorage.getItem(newKey)) {
+      localStorage.setItem(newKey, val);
+    }
+  });
+  if (!localStorage.getItem(STATS_KEY)) {
+    localStorage.setItem(STATS_KEY, JSON.stringify({ totalTrades: 0 }));
+  }
+  if (!localStorage.getItem(ACH_KEY)) {
+    localStorage.setItem(ACH_KEY, JSON.stringify([]));
+  }
+  localStorage.setItem('lc_migrated', 'true');
+}
+
+// ==================== COINS API ====================
+const FALLBACK_COINS = [
+  { id:'bitcoin', symbol:'btc', name:'Bitcoin', image:'https://assets.coingecko.com/coins/images/1/large/bitcoin.png', current_price:67000, price_change_percentage_24h:1.2 },
+  { id:'ethereum', symbol:'eth', name:'Ethereum', image:'https://assets.coingecko.com/coins/images/279/large/ethereum.png', current_price:3500, price_change_percentage_24h:-0.8 },
+  { id:'solana', symbol:'sol', name:'Solana', image:'https://assets.coingecko.com/coins/images/4128/large/solana.png', current_price:185, price_change_percentage_24h:3.4 },
+  { id:'binancecoin', symbol:'bnb', name:'BNB', image:'https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png', current_price:580, price_change_percentage_24h:0.5 },
+  { id:'ripple', symbol:'xrp', name:'XRP', image:'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png', current_price:0.62, price_change_percentage_24h:-1.1 },
+  { id:'cardano', symbol:'ada', name:'Cardano', image:'https://assets.coingecko.com/coins/images/975/large/cardano.png', current_price:0.48, price_change_percentage_24h:2.1 },
+  { id:'avalanche-2', symbol:'avax', name:'Avalanche', image:'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png', current_price:38, price_change_percentage_24h:4.2 },
+  { id:'dogecoin', symbol:'doge', name:'Dogecoin', image:'https://assets.coingecko.com/coins/images/5/large/dogecoin.png', current_price:0.165, price_change_percentage_24h:-2.3 },
+  { id:'polkadot', symbol:'dot', name:'Polkadot', image:'https://assets.coingecko.com/coins/images/12171/large/polkadot.png', current_price:8.20, price_change_percentage_24h:1.8 },
+  { id:'chainlink', symbol:'link', name:'Chainlink', image:'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png', current_price:15.40, price_change_percentage_24h:3.1 },
+  { id:'uniswap', symbol:'uni', name:'Uniswap', image:'https://assets.coingecko.com/coins/images/12504/large/uni.jpg', current_price:9.80, price_change_percentage_24h:-0.5 },
+  { id:'litecoin', symbol:'ltc', name:'Litecoin', image:'https://assets.coingecko.com/coins/images/2/large/litecoin.png', current_price:88, price_change_percentage_24h:0.9 },
+  { id:'shiba-inu', symbol:'shib', name:'Shiba Inu', image:'https://assets.coingecko.com/coins/images/11939/large/shiba.png', current_price:0.0000248, price_change_percentage_24h:5.6 },
+  { id:'stellar', symbol:'xlm', name:'Stellar', image:'https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png', current_price:0.12, price_change_percentage_24h:-1.4 },
+  { id:'tron', symbol:'trx', name:'TRON', image:'https://assets.coingecko.com/coins/images/1094/large/tron-logo.png', current_price:0.14, price_change_percentage_24h:0.3 },
+  { id:'near', symbol:'near', name:'NEAR Protocol', image:'https://assets.coingecko.com/coins/images/10365/large/near.jpg', current_price:6.20, price_change_percentage_24h:2.8 },
+  { id:'aptos', symbol:'apt', name:'Aptos', image:'https://assets.coingecko.com/coins/images/26455/large/aptos_round.png', current_price:9.15, price_change_percentage_24h:-0.7 },
+  { id:'internet-computer', symbol:'icp', name:'Internet Computer', image:'https://assets.coingecko.com/coins/images/14495/large/Internet_Computer_logo.png', current_price:12.50, price_change_percentage_24h:1.9 },
+  { id:'filecoin', symbol:'fil', name:'Filecoin', image:'https://assets.coingecko.com/coins/images/12817/large/filecoin.png', current_price:5.80, price_change_percentage_24h:-3.2 },
+  { id:'vechain', symbol:'vet', name:'VeChain', image:'https://assets.coingecko.com/coins/images/1167/large/VeChain-Logo-768x725.png', current_price:0.038, price_change_percentage_24h:0.6 }
+];
+
+async function loadCoins() {
+  try {
+    const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      coins = data;
+      return;
+    }
+    throw new Error('Empty data');
+  } catch(e) {
+    if (coins.length === 0) coins = FALLBACK_COINS;
+  }
+}
+
+function getCoin(id) {
+  return coins.find(c => c.id === id) || null;
+}
+
+// ==================== PORTFOLIO BANNER ====================
+function updatePortfolioBanner() {
+  const acct = getAccount();
+  if (!acct) return;
+
+  let holdingsValue = 0;
+  acct.holdings.forEach(h => {
+    const c = getCoin(h.coinId);
+    if (c) holdingsValue += c.current_price * h.amount;
+  });
+
+  const total = acct.cash + holdingsValue;
+  const pnl = total - acct.startAmount;
+  const pnlPct = ((pnl / acct.startAmount) * 100).toFixed(2);
+  const isDream = currentAccount === 'dream';
+
+  document.getElementById('banner-total').textContent = fmt(total);
+  document.getElementById('banner-pnl').textContent = (pnl >= 0 ? '+' : '') + fmt(pnl) + ' (' + (pnl >= 0 ? '+' : '') + pnlPct + '%)';
+  document.getElementById('banner-pnl').className = 'banner-stat-val ' + (pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('banner-cash').textContent = fmt(acct.cash);
+  document.getElementById('banner-start').textContent = fmt(acct.startAmount);
+  document.getElementById('banner-badge').textContent = isDream ? '✨ Dream' : '💼 Primary';
+  document.getElementById('banner-badge').className = 'acct-badge' + (isDream ? ' dream' : '');
+  document.getElementById('portfolio-banner').className = 'portfolio-banner' + (isDream ? ' dream-mode' : '');
+
+  updateRankDisplay();
+}
+
+// ==================== TABS ====================
+function showTab(tab, btnEl) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (btnEl) btnEl.classList.add('active');
+
+  if (tab === 'markets') renderMarkets(document.getElementById('market-search-input').value);
+  if (tab === 'trade') renderTradeList(document.getElementById('trade-search-input').value);
+  if (tab === 'dashboard') { renderHoldings(); renderGoals(); renderAchievements(); }
+  if (tab === 'notebook') renderNotes();
+  if (tab === 'coach') initCoach();
+}
+
+// ==================== ACCOUNT SWITCHER ====================
+function switchAccount(type) {
+  currentAccount = type;
+  document.getElementById('btn-primary-acct').classList.toggle('active', type === 'primary');
+  document.getElementById('btn-dream-acct').classList.toggle('active', type === 'dream');
+  document.getElementById('app').classList.toggle('dream-active', type === 'dream');
+  updatePortfolioBanner();
+  renderHoldings();
+  renderGoals();
+  renderTradeList(document.getElementById('trade-search-input').value);
+  renderMarkets(document.getElementById('market-search-input').value);
+}
+
+// ==================== HOLDINGS ====================
+function renderHoldings() {
+  const acct = getAccount();
+  const container = document.getElementById('holdings-list');
+  if (!acct || acct.holdings.length === 0) {
+    container.innerHTML =
+      '<div class="empty-state">' +
+      '<div class="empty-icon">🏦</div>' +
+      '<div class="empty-title">No holdings yet</div>' +
+      '<div class="empty-desc">Tap ⚡ Trade above, search for a coin, then tap Buy to make your first trade.</div>' +
+      '</div>';
+    return;
+  }
+  container.innerHTML = acct.holdings.map(h => {
+    const c = getCoin(h.coinId);
+    if (!c) return '';
+    const curVal = c.current_price * h.amount;
+    const costBasis = h.avgBuyPrice * h.amount;
+    const pnl = curVal - costBasis;
+    const pnlPct = ((pnl / costBasis) * 100).toFixed(2);
+    return '<div class="holding-card">' +
+      '<img class="coin-img" src="' + c.image + '" alt="' + c.name + '" onerror="this.src=\'https://via.placeholder.com/44\'">' +
+      '<div class="holding-info">' +
+        '<div class="holding-name">' + c.name + '</div>' +
+        '<div class="holding-sub">' + fmtAmt(h.amount) + ' ' + c.symbol.toUpperCase() + ' @ avg ' + fmtP(h.avgBuyPrice) + '</div>' +
+      '</div>' +
+      '<div class="holding-right">' +
+        '<div class="holding-val">' + fmt(curVal) + '</div>' +
+        '<div class="holding-pnl ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + (pnl >= 0 ? '+' : '') + fmt(pnl) + ' (' + (pnl >= 0 ? '+' : '') + pnlPct + '%)</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ==================== GOALS ====================
+function renderGoals() {
+  const profile = getProfile();
+  if (!profile) return;
+  const g = profile.goals;
+  const colors = { hodl: '#00d4ff', day: '#a855f7', moon: '#ffd700', explore: '#00d09c' };
+  const labels = { hodl: '🏦 HODL', day: '⚡ Day Trading', moon: '🌕 Moonshots', explore: '🤔 Exploring' };
+  document.getElementById('goals-display').innerHTML = Object.keys(g).map(k =>
+    '<div class="goal-progress-row">' +
+    '<div class="gp-header">' +
+    '<span class="gp-name">' + labels[k] + '</span>' +
+    '<span class="gp-pct">' + g[k] + '%</span>' +
+    '</div>' +
+    '<div class="gp-bar"><div class="gp-fill" style="width:' + g[k] + '%;background:' + colors[k] + '"></div></div>' +
+    '</div>'
+  ).join('');
+}
+
+// ==================== MARKETS ====================
+function renderMarkets(filter) {
+  const f = (filter || '').toLowerCase();
+  const filtered = coins.filter(c =>
+    !f || c.name.toLowerCase().includes(f) || c.symbol.toLowerCase().includes(f)
+  );
+  const el = document.getElementById('markets-list');
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-desc">No coins found</div></div>';
+    return;
+  }
+  el.innerHTML = filtered.slice(0, 100).map((c, i) => {
+    const chg = c.price_change_percentage_24h || 0;
+    return '<div class="market-row" onclick="openTradeModal(\'' + c.id + '\')">' +
+      '<span class="market-rank">' + (i + 1) + '</span>' +
+      '<img class="market-img" src="' + c.image + '" alt="' + c.name + '" onerror="this.src=\'https://via.placeholder.com/38\'">' +
+      '<div class="market-info">' +
+        '<div class="market-name">' + c.name + '</div>' +
+        '<div class="market-symbol">' + c.symbol + '</div>' +
+      '</div>' +
+      '<div class="market-right">' +
+        '<div class="market-price">' + fmtP(c.current_price) + '</div>' +
+        '<div class="market-change ' + (chg >= 0 ? 'pos' : 'neg') + '">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function filterMarkets(v) { renderMarkets(v); }
+
+// ==================== TRADE LIST ====================
+function renderTradeList(filter) {
+  const f = (filter || '').toLowerCase();
+  const filtered = coins.filter(c =>
+    !f || c.name.toLowerCase().includes(f) || c.symbol.toLowerCase().includes(f)
+  );
+  const el = document.getElementById('trade-list');
+  el.innerHTML = filtered.slice(0, 100).map(c => {
+    const chg = c.price_change_percentage_24h || 0;
+    return '<div class="trade-row" onclick="openTradeModal(\'' + c.id + '\')">' +
+      '<img class="market-img" src="' + c.image + '" alt="' + c.name + '" onerror="this.src=\'https://via.placeholder.com/38\'">' +
+      '<div class="market-info">' +
+        '<div class="market-name">' + c.name + '</div>' +
+        '<div class="market-symbol">' + c.symbol.toUpperCase() + '</div>' +
+      '</div>' +
+      '<div class="market-right">' +
+        '<div class="market-price">' + fmtP(c.current_price) + '</div>' +
+        '<div class="market-change ' + (chg >= 0 ? 'pos' : 'neg') + '">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function filterTrade(v) { renderTradeList(v); }
+
+// ==================== TRADE MODAL ====================
+function openTradeModal(coinId) {
+  const c = getCoin(coinId);
+  if (!c) return;
+  tradeModalCoinId = coinId;
+  tradeType = 'buy';
+  document.getElementById('modal-img').src = c.image;
+  document.getElementById('modal-name').textContent = c.name;
+  document.getElementById('modal-price').textContent = fmtP(c.current_price);
+  document.getElementById('modal-usd-input').value = '';
+  document.getElementById('modal-preview').innerHTML = '<span class="preview-label">You will receive:</span> —';
+  setTradeType('buy');
+  updateModalBalance();
+  document.getElementById('trade-modal').classList.add('open');
+}
+
+function closeTradeModal() {
+  document.getElementById('trade-modal').classList.remove('open');
+  tradeModalCoinId = null;
+}
+
+function openHelp() {
+  document.getElementById('help-modal').classList.add('open');
+}
+function closeHelp() {
+  document.getElementById('help-modal').classList.remove('open');
+}
+function closeHelpOutside(e) {
+  if (e.target === document.getElementById('help-modal')) closeHelp();
+}
+
+function setTradeType(type) {
+  tradeType = type;
+  const buyBtn = document.getElementById('tab-buy');
+  const sellBtn = document.getElementById('tab-sell');
+  const execBtn = document.getElementById('modal-execute-btn');
+  buyBtn.className = 'trade-tab ' + (type === 'buy' ? 'active-buy' : '');
+  sellBtn.className = 'trade-tab ' + (type === 'sell' ? 'active-sell' : '');
+  execBtn.className = 'modal-execute ' + type;
+  execBtn.textContent = type === 'buy' ? 'Buy' : 'Sell';
+  updateModalBalance();
+  document.getElementById('modal-usd-input').value = '';
+  updatePreview();
+}
+
+function updateModalBalance() {
+  const acct = getAccount();
+  const el = document.getElementById('modal-balance-line');
+  if (tradeType === 'buy') {
+    el.innerHTML = 'Cash available: <span id="modal-cash-val">' + fmt(acct ? acct.cash : 0) + '</span>';
+  } else {
+    const h = acct ? acct.holdings.find(x => x.coinId === tradeModalCoinId) : null;
+    const c = getCoin(tradeModalCoinId);
+    const holdVal = h && c ? c.current_price * h.amount : 0;
+    el.innerHTML = 'Holding value: <span id="modal-cash-val">' + fmt(holdVal) + '</span>';
+  }
+}
+
+function setQuickAmount(pct) {
+  const acct = getAccount();
+  if (!acct) return;
+  let max = 0;
+  if (tradeType === 'buy') {
+    max = acct.cash;
+  } else {
+    const h = acct.holdings.find(x => x.coinId === tradeModalCoinId);
+    const c = getCoin(tradeModalCoinId);
+    max = h && c ? c.current_price * h.amount : 0;
+  }
+  document.getElementById('modal-usd-input').value = (max * pct / 100).toFixed(2);
+  updatePreview();
+}
+
+function updatePreview() {
+  const usd = parseFloat(document.getElementById('modal-usd-input').value) || 0;
+  const c = getCoin(tradeModalCoinId);
+  const execBtn = document.getElementById('modal-execute-btn');
+  if (!c || usd <= 0) {
+    document.getElementById('modal-preview').innerHTML = '<span class="preview-label">You will receive:</span> —';
+    execBtn.disabled = true;
+    return;
+  }
+  const acct = getAccount();
+  if (tradeType === 'buy') {
+    if (usd > acct.cash) {
+      document.getElementById('modal-preview').innerHTML = '<span style="color:var(--red)">Not enough cash</span>';
+      execBtn.disabled = true;
+      return;
+    }
+    const qty = usd / c.current_price;
+    document.getElementById('modal-preview').innerHTML = '<span class="preview-label">You will receive:</span> <strong>' + fmtAmt(qty) + ' ' + c.symbol.toUpperCase() + '</strong> for ' + fmt(usd);
+  } else {
+    const h = acct.holdings.find(x => x.coinId === tradeModalCoinId);
+    if (!h) {
+      document.getElementById('modal-preview').innerHTML = '<span style="color:var(--red)">You don\'t own this coin</span>';
+      execBtn.disabled = true;
+      return;
+    }
+    const maxSellVal = c.current_price * h.amount;
+    if (usd > maxSellVal) {
+      document.getElementById('modal-preview').innerHTML = '<span style="color:var(--red)">Not enough coins to sell</span>';
+      execBtn.disabled = true;
+      return;
+    }
+    const qty = usd / c.current_price;
+    document.getElementById('modal-preview').innerHTML = '<span class="preview-label">You will sell:</span> <strong>' + fmtAmt(qty) + ' ' + c.symbol.toUpperCase() + '</strong> for <strong>' + fmt(usd) + '</strong>';
+  }
+  execBtn.disabled = false;
+}
+
+function executeTrade() {
+  const usd = parseFloat(document.getElementById('modal-usd-input').value) || 0;
+  const c = getCoin(tradeModalCoinId);
+  if (!c || usd <= 0) return;
+  const acct = getAccount();
+
+  if (tradeType === 'buy') {
+    if (usd > acct.cash) { showToast('Not enough cash!'); return; }
+    const qty = usd / c.current_price;
+    acct.cash -= usd;
+    const existing = acct.holdings.find(h => h.coinId === c.id);
+    if (existing) {
+      const totalCost = existing.avgBuyPrice * existing.amount + usd;
+      existing.amount += qty;
+      existing.avgBuyPrice = totalCost / existing.amount;
+    } else {
+      acct.holdings.push({ coinId: c.id, name: c.name, symbol: c.symbol, image: c.image, amount: qty, avgBuyPrice: c.current_price });
+    }
+    saveAccount(acct);
+    showToast('✅ Bought ' + fmtAmt(qty) + ' ' + c.symbol.toUpperCase() + ' for ' + fmt(usd));
+  } else {
+    const qty = usd / c.current_price;
+    const h = acct.holdings.find(x => x.coinId === c.id);
+    if (!h || qty > h.amount + 0.00001) { showToast('Not enough coins!'); return; }
+    h.amount -= qty;
+    acct.cash += usd;
+    if (h.amount < 0.000001) {
+      acct.holdings = acct.holdings.filter(x => x.coinId !== c.id);
+    }
+    saveAccount(acct);
+    showToast('✅ Sold ' + fmtAmt(qty) + ' ' + c.symbol.toUpperCase() + ' for ' + fmt(usd));
+  }
+
+  // Increment trade counter
+  const stats = getStats();
+  const prevRank = getRankInfo(stats.totalTrades).name;
+  stats.totalTrades++;
+  saveStats(stats);
+  const newRank = getRankInfo(stats.totalTrades).name;
+
+  // Rank-up toast
+  if (newRank !== prevRank) {
+    setTimeout(() => showToast('🎉 Rank Up! You are now ' + newRank, 'rank'), 400);
+  }
+
+  // Check achievements
+  setTimeout(() => checkAchievements(), 200);
+
+  closeTradeModal();
+  updatePortfolioBanner();
+  renderHoldings();
+  renderAchievements();
+}
+
+// ==================== NOTEBOOK ====================
+function saveNote() {
+  const text = document.getElementById('note-input').value.trim();
+  if (!text) { showToast('Write something first!'); return; }
+  const notes = getNotes();
+  notes.unshift({ id: Date.now(), text, timestamp: new Date().toLocaleString() });
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  document.getElementById('note-input').value = '';
+  renderNotes();
+  showToast('📝 Note saved!');
+  // Check note-taker achievement
+  setTimeout(() => checkAchievements(), 100);
+}
+
+function deleteNote(id) {
+  const notes = getNotes().filter(n => n.id !== id);
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  renderNotes();
+}
+
+function renderNotes() {
+  const notes = getNotes();
+  const el = document.getElementById('notes-list');
+  if (notes.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📓</div><div class="empty-title">No notes yet</div><div class="empty-desc">Use this notebook to write down strategies, track ideas, or remind yourself why you made a trade.</div></div>';
+    return;
+  }
+  el.innerHTML = notes.map(n =>
+    '<div class="note-card">' +
+    '<div class="note-text">' + escapeHtml(n.text) + '</div>' +
+    '<div class="note-time">' + n.timestamp + '</div>' +
+    '<button class="note-delete" onclick="deleteNote(' + n.id + ')">🗑</button>' +
+    '</div>'
+  ).join('');
+}
+
+// ==================== TOAST ====================
+let toastTimer = null;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type === 'rank' ? ' rank-toast' : type === 'ach' ? ' ach-toast' : '');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ==================== FORMATTERS ====================
+function fmt(n) {
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1000) return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return '$' + (n || 0).toFixed(2);
+}
+function fmtP(p) {
+  if (!p) return '$0.00';
+  if (p >= 1000) return '$' + p.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (p >= 1) return '$' + p.toFixed(4);
+  if (p >= 0.01) return '$' + p.toFixed(6);
+  return '$' + p.toFixed(8);
+}
+function fmtAmt(n) {
+  if (n >= 1000) return n.toFixed(2);
+  if (n >= 1) return n.toFixed(4);
+  if (n >= 0.001) return n.toFixed(6);
+  return n.toFixed(8);
+}
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ==================== COACH ====================
+const COACH_BACKEND = 'https://YOUR-RAILWAY-URL.up.railway.app';
+const LIGHTCHAIN_CHAIN_ID = '0x23F0'; // 9200
+const COACH_SUB_KEY  = 'lc_coach_sub';  // {wallet, expires_at}
+const COACH_MSGS_KEY = 'lc_coach_msgs'; // [{role:'user'|'ai', text}]
+
+let coachWallet     = null;
+let coachSubExpiry  = null;
+let coachJobId      = null;
+let coachPollTimer  = null;
+let coachPriceData  = null;
+let coachInitDone   = false;
+
+function _showCoachView(viewId) {
+  ['coach-loading','coach-gate-connect','coach-gate-pay','coach-chat-wrap']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  const target = document.getElementById(viewId);
+  if (!target) return;
+  target.style.display = (viewId === 'coach-chat-wrap') ? 'flex' : 'block';
+}
+
+async function initCoach() {
+  // Only re-run if wallet changed or not yet done
+  _showCoachView('coach-loading');
+  document.getElementById('coach-loading-text').textContent = 'Loading Coach...';
+
+  if (!window.ethereum) {
+    _showCoachView('coach-gate-connect');
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts && accounts.length > 0) {
+      coachWallet = accounts[0].toLowerCase();
+      await _coachCheckSub();
+    } else {
+      _showCoachView('coach-gate-connect');
+    }
+  } catch (e) {
+    _showCoachView('coach-gate-connect');
+  }
+}
+
+let _wcProv = null;
+
+async function coachConnectViaWalletConnect() {
+  if (!window.WCEthereumProvider) { showToast('WalletConnect not loaded yet. Try again.'); return; }
+  try {
+    _wcProv = await window.WCEthereumProvider.init({
+      projectId: '3c6a0da53258912a28923198ddac3333',
+      chains: [9200], optionalChains: [1], showQrModal: true,
+      metadata: { name: 'LightCoach', description: 'Crypto Portfolio Coach on Lightchain', url: 'https://lightcoach.win', icons: [] },
+      rpcMap: { 9200: 'https://rpc.mainnet.lightchain.ai' }
+    });
+    await _wcProv.enable();
+    window.ethereum = _wcProv;
+    await coachConnectWallet();
+  } catch(e) {
+    if (!e || e.message?.includes('User rejected') || e.message?.includes('rejected') || e.code === 4001) return;
+    showToast('WalletConnect failed. Try a different wallet.');
+  }
+}
+
+async function coachConnectWallet() {
+  if (!window.ethereum) {
+    if (window.WCEthereumProvider) { await coachConnectViaWalletConnect(); return; }
+    showToast('No wallet found. Install a browser wallet extension or use WalletConnect.');
+    return;
+  }
+  _showCoachView('coach-loading');
+  document.getElementById('coach-loading-text').textContent = 'Connecting wallet...';
+  try {
+    // Switch to Lightchain network
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: LIGHTCHAIN_CHAIN_ID }]
+      });
+    } catch (sw) {
+      if (sw.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: LIGHTCHAIN_CHAIN_ID,
+            chainName: 'Lightchain AI',
+            rpcUrls: ['https://rpc.mainnet.lightchain.ai'],
+            nativeCurrency: { name: 'LCAI', symbol: 'LCAI', decimals: 18 }
+          }]
+        });
+      }
+    }
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    coachWallet = accounts[0].toLowerCase();
+    await _coachCheckSub();
+  } catch (e) {
+    _showCoachView('coach-gate-connect');
+    if (e.code !== 4001) showToast('Wallet connection failed');
+  }
+}
+
+async function _coachCheckSub() {
+  _showCoachView('coach-loading');
+  document.getElementById('coach-loading-text').textContent = 'Checking subscription...';
+
+  // Check local cache first
+  const cached = JSON.parse(localStorage.getItem(COACH_SUB_KEY) || 'null');
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (cached && cached.wallet === coachWallet && cached.expires_at > nowSec + 60) {
+    coachSubExpiry = cached.expires_at;
+    _coachShowChat();
+    return;
+  }
+
+  // Check with server
+  try {
+    const r = await fetch(COACH_BACKEND + '/api/lc/subscription/' + coachWallet);
+    const d = await r.json();
+    if (d.subscribed && d.expires_at > nowSec) {
+      coachSubExpiry = d.expires_at;
+      localStorage.setItem(COACH_SUB_KEY, JSON.stringify({ wallet: coachWallet, expires_at: d.expires_at }));
+      _coachShowChat();
+    } else {
+      await _coachShowPayGate();
+    }
+  } catch (e) {
+    await _coachShowPayGate();
+  }
+}
+
+async function _coachShowPayGate() {
+  const badge = document.getElementById('coach-wallet-badge');
+  if (badge) badge.textContent = coachWallet.slice(0, 6) + '...' + coachWallet.slice(-4);
+  _showCoachView('coach-gate-pay');
+
+  const btn  = document.getElementById('coach-pay-btn');
+  const val  = document.getElementById('coach-pay-lcai-val');
+  const note = document.getElementById('coach-pay-note');
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading price...';
+  val.textContent = 'Loading...';
+  note.textContent = '30-day access \xB7 Verified on-chain';
+
+  try {
+    const r = await fetch(COACH_BACKEND + '/api/lcai-price');
+    coachPriceData = await r.json();
+    const lcai = coachPriceData.required_lcai.toFixed(4);
+    val.textContent = lcai + ' LCAI';
+    btn.textContent = '⚡ Pay ' + lcai + ' LCAI';
+    btn.disabled = false;
+  } catch (e) {
+    val.textContent = 'Price unavailable';
+    note.textContent = 'Could not load price — try refreshing';
+  }
+}
+
+async function coachPay() {
+  if (!coachPriceData || !coachWallet) return;
+  const btn  = document.getElementById('coach-pay-btn');
+  const note = document.getElementById('coach-pay-note');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending payment...';
+
+  try {
+    // Ensure on Lightchain
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: LIGHTCHAIN_CHAIN_ID }]
+      });
+    } catch (e) { /* already switched or not needed */ }
+
+    // Amount with 1% buffer so rounding never short-pays
+    const lcaiBig = BigInt(Math.ceil(coachPriceData.required_lcai * 1e18 * 1.01));
+    const valueHex = '0x' + lcaiBig.toString(16);
+
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{
+        from: coachWallet,
+        to: coachPriceData.owner_wallet,
+        value: valueHex,
+        gas: '0x5208'
+      }]
+    });
+
+    btn.textContent = '⏳ Verifying...';
+    note.textContent = 'Transaction sent — confirming on-chain...';
+    await _coachVerify(txHash, btn, note, 0);
+
+  } catch (e) {
+    btn.disabled = false;
+    if (coachPriceData) {
+      const lcai = coachPriceData.required_lcai.toFixed(4);
+      btn.textContent = '⚡ Pay ' + lcai + ' LCAI';
+    }
+    if (e.code !== 4001) showToast('Payment failed — please try again');
+  }
+}
+
+async function _coachVerify(txHash, btn, note, attempt) {
+  const maxAttempts = 24; // ~96 seconds
+  if (attempt >= maxAttempts) {
+    btn.disabled = false;
+    btn.textContent = 'Retry Verification';
+    note.textContent = 'TX sent but verification timed out — tap to retry';
+    btn.onclick = () => _coachVerify(txHash, btn, note, 0);
+    return;
+  }
+  try {
+    const r = await fetch(COACH_BACKEND + '/api/lc/verify-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: coachWallet, tx_hash: txHash })
+    });
+    const d = await r.json();
+
+    if (d.subscribed) {
+      coachSubExpiry = d.expires_at;
+      localStorage.setItem(COACH_SUB_KEY, JSON.stringify({ wallet: coachWallet, expires_at: d.expires_at }));
+      showToast('✅ Subscribed! Welcome to Coach!');
+      _coachShowChat();
+    } else if (d.error === 'tx_pending' || d.error === 'tx_not_found') {
+      if (btn) btn.textContent = '⏳ Confirming (' + (attempt + 1) + '/' + maxAttempts + ')...';
+      setTimeout(() => _coachVerify(txHash, btn, note, attempt + 1), 4000);
+    } else {
+      btn.disabled = false;
+      const lcai = coachPriceData ? coachPriceData.required_lcai.toFixed(4) : '?';
+      btn.textContent = '⚡ Pay ' + lcai + ' LCAI';
+      showToast(d.message || 'Verification failed');
+    }
+  } catch (e) {
+    setTimeout(() => _coachVerify(txHash, btn, note, attempt + 1), 4000);
+  }
+}
+
+function _coachShowChat() {
+  _showCoachView('coach-chat-wrap');
+
+  // Update expiry label
+  if (coachSubExpiry) {
+    const d = new Date(coachSubExpiry * 1000);
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const el = document.getElementById('coach-chat-exp');
+    if (el) el.textContent = 'Until ' + label;
+  }
+
+  // Unlock the tab button
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if ((b.getAttribute('onclick') || '').includes("'coach'")) {
+      b.innerHTML = '\u{1F393} Coach';
+      b.classList.remove('locked');
+    }
+  });
+
+  // Render saved messages or welcome
+  let msgs = JSON.parse(localStorage.getItem(COACH_MSGS_KEY) || '[]');
+  if (msgs.length === 0) {
+    msgs = [{ role: 'ai', text: "Hey! I'm LightCoach — your personal AI crypto trading coach. Ask me about market strategy, reading charts, managing risk, or anything else crypto-related. What's on your mind?" }];
+    localStorage.setItem(COACH_MSGS_KEY, JSON.stringify(msgs));
+  }
+  _coachRender(msgs);
+}
+
+function _coachRender(msgs) {
+  const container = document.getElementById('coach-messages');
+  if (!container) return;
+  container.innerHTML = msgs.map(m =>
+    '<div class="coach-msg from-' + (m.role === 'user' ? 'user' : 'ai') + '">' +
+    escapeHtml(m.text) +
+    '</div>'
+  ).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function coachInputAutosize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function coachInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    coachSend();
+  }
+}
+
+async function coachSend() {
+  const input   = document.getElementById('coach-input');
+  const sendBtn = document.getElementById('coach-send-btn');
+  const text    = (input.value || '').trim();
+  if (!text || coachJobId) return;
+
+  sendBtn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Append user message
+  let msgs = JSON.parse(localStorage.getItem(COACH_MSGS_KEY) || '[]');
+  msgs.push({ role: 'user', text });
+  localStorage.setItem(COACH_MSGS_KEY, JSON.stringify(msgs));
+  _coachRender(msgs);
+
+  // Typing indicator
+  const container = document.getElementById('coach-messages');
+  const typing = document.createElement('div');
+  typing.className = 'coach-msg from-ai typing';
+  typing.id = 'coach-typing';
+  typing.textContent = 'Coach is thinking…';
+  container.appendChild(typing);
+  container.scrollTop = container.scrollHeight;
+
+  // Build context from user profile + portfolio
+  let ctx = '';
+  const profile = getProfile();
+  const primary = JSON.parse(localStorage.getItem(PRIMARY_KEY) || 'null');
+  if (profile) {
+    ctx += 'Experience: ' + (profile.experience || 'unknown') + '. ';
+    if (profile.goals) {
+      ctx += 'Goals: HODL ' + profile.goals.hodl + '%, Day ' + profile.goals.day + '%, Moon ' + profile.goals.moon + '%, Explore ' + profile.goals.explore + '%. ';
+    }
+  }
+  if (primary) {
+    ctx += 'Virtual portfolio: $' + primary.cash.toFixed(2) + ' cash';
+    if (primary.holdings && primary.holdings.length > 0) {
+      ctx += ', holds ' + primary.holdings.map(h => h.name).join(', ');
+    }
+    ctx += '.';
+  }
+
+  try {
+    const r = await fetch(COACH_BACKEND + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, wallet: coachWallet, context: ctx })
+    });
+
+    if (r.status === 402) {
+      // Subscription expired
+      typing.remove();
+      sendBtn.disabled = false;
+      coachSubExpiry = null;
+      localStorage.removeItem(COACH_SUB_KEY);
+      showToast('Subscription expired — please renew');
+      await _coachShowPayGate();
+      return;
+    }
+
+    const d = await r.json();
+    if (!d.job_id) throw new Error('No job_id returned');
+    coachJobId = d.job_id;
+    _coachPoll();
+
+  } catch (e) {
+    typing.remove();
+    sendBtn.disabled = false;
+    coachJobId = null;
+    showToast('Coach is unavailable right now — try again');
+  }
+}
+
+function _coachPoll() {
+  if (!coachJobId) return;
+  coachPollTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(COACH_BACKEND + '/api/chat/status?job_id=' + coachJobId);
+      const d = await r.json();
+
+      if (d.status === 'done' && d.reply) {
+        coachJobId = null;
+        const typing = document.getElementById('coach-typing');
+        if (typing) typing.remove();
+
+        let msgs = JSON.parse(localStorage.getItem(COACH_MSGS_KEY) || '[]');
+        msgs.push({ role: 'ai', text: d.reply });
+        // Keep last 50 messages so localStorage stays lean
+        if (msgs.length > 50) msgs = msgs.slice(msgs.length - 50);
+        localStorage.setItem(COACH_MSGS_KEY, JSON.stringify(msgs));
+        _coachRender(msgs);
+        document.getElementById('coach-send-btn').disabled = false;
+
+      } else if (d.status === 'error') {
+        coachJobId = null;
+        const typing = document.getElementById('coach-typing');
+        if (typing) typing.remove();
+        document.getElementById('coach-send-btn').disabled = false;
+        showToast('Coach had an error — please try again');
+
+      } else {
+        _coachPoll(); // still pending
+      }
+    } catch (e) {
+      _coachPoll(); // retry on network blip
+    }
+  }, 1800);
+}
+
+// ==================== BOOT ====================
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem(ONBOARD_KEY) === 'true') {
+    startApp();
+  } else {
+    // Initialize the Next button state for step 1
+    updateObButtons();
+  }
+});
+</script>
+</body>
+</html>
