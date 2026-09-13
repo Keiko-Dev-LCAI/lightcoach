@@ -6,6 +6,7 @@
 <title>LightCoach — Learn to Trade</title>
 <style>
   :root {
+  --on-accent: #0a0f1e;
     --bg: #0d1828;
     --card: #122236;
     --card2: #182d44;
@@ -51,16 +52,13 @@
     background: radial-gradient(ellipse at top, #0d1f3a 0%, #080d1a 70%);
     min-height: 100vh;
   }
-  .ob-logo {
+  .ob-logo {color:var(--cyan);
     font-size: 42px;
     font-weight: 900;
     letter-spacing: -1px;
     margin-bottom: 8px;
     margin-top: 32px;
-    background: linear-gradient(135deg, var(--cyan), #a855f7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+    }
   .ob-tagline {
     font-size: 20px;
     color: var(--sub);
@@ -166,7 +164,7 @@
     width: 24px; height: 24px;
     border-radius: 50%;
     background: var(--cyan);
-    box-shadow: 0 0 8px rgba(0,212,255,0.6);
+    box-shadow:none;
     cursor: pointer;
   }
   .goal-total {
@@ -424,13 +422,10 @@
     backdrop-filter: blur(12px);
     box-shadow: 0 2px 16px rgba(0,0,0,0.4);
   }
-  .header-logo {
+  .header-logo {color:var(--cyan);
     font-size: 26px;
     font-weight: 900;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--cyan) 0%, #7eb8ff 50%, var(--purple) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 8px var(--cyan-glow));
   }
   .account-switcher {
@@ -524,10 +519,7 @@
     margin-bottom: 8px;
     color: var(--text);
   }
-  .portfolio-banner.dream-mode .banner-value {
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 50%, #fff5cc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .portfolio-banner.dream-mode .banner-value {color:var(--cyan);
     filter: drop-shadow(0 0 12px rgba(255,215,0,0.4));
   }
   .banner-meta {
@@ -654,7 +646,7 @@
   }
   .holding-card:hover {
     border-color: var(--border2);
-    border-left-color: var(--cyan);
+    
     background: var(--card2);
     transform: translateX(2px);
     box-shadow: var(--shadow-hover);
@@ -1046,14 +1038,11 @@
     display: block;
     filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));
   }
-  .coach-title {
+  .coach-title {color:var(--cyan);
     font-size: 34px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, var(--purple), #c084fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+    }
   .coach-desc { font-size: 20px; color: var(--sub2); line-height: 1.4; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto; }
   .coach-wallet-badge {
     display: inline-block;
