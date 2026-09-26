@@ -25,7 +25,7 @@
     --purple: #a855f7;
     --text: #f0f4ff;
     --text2: #c8d3e8;
-    --sub: #6b7a96;
+    --sub: #a8b6d0;
     --sub2: #8a97b2;
     --border: #1c2a42;
     --border2: #253550;
@@ -327,7 +327,7 @@
     margin-left: 8px;
     flex-shrink: 0;
   }
-  .help-btn:hover { background: var(--cyan-dim); box-shadow: 0 0 0 1px rgba(0,212,255,0.5); }
+  .help-btn:hover { background: var(--cyan-dim); }
 
   /* ========== HELP MODAL ========== */
   .help-overlay {
@@ -426,7 +426,7 @@
     font-size: 26px;
     font-weight: 900;
     letter-spacing: -0.5px;
-    filter: drop-shadow(0 0 8px var(--cyan-glow));
+    filter: none;
   }
   .account-switcher {
     display: flex;
@@ -452,12 +452,12 @@
   .acct-btn.active {
     background: linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,144,192,0.12));
     color: var(--cyan);
-    box-shadow: 0 0 0 1px rgba(0,212,255,0.3), 0 2px 8px rgba(0,212,255,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
   .acct-btn.dream.active {
     background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,184,0,0.12));
     color: var(--gold);
-    box-shadow: 0 0 0 1px rgba(255,215,0,0.4), 0 2px 8px rgba(255,215,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
   /* Portfolio Banner */
@@ -503,13 +503,12 @@
     color: var(--cyan);
     border: 1px solid rgba(0,212,255,0.3);
     letter-spacing: 0.5px;
-    text-transform: uppercase;
   }
   .acct-badge.dream {
     background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,184,0,0.1));
     color: var(--gold);
     border-color: rgba(255,215,0,0.4);
-    box-shadow: 0 0 8px rgba(255,215,0,0.15);
+    box-shadow: none;
   }
   .banner-value {
     font-size: 40px;
@@ -520,7 +519,7 @@
     color: var(--text);
   }
   .portfolio-banner.dream-mode .banner-value {color:var(--cyan);
-    filter: drop-shadow(0 0 12px rgba(255,215,0,0.4));
+    filter: none;
   }
   .banner-meta {
     display: flex;
@@ -567,9 +566,9 @@
   .rank-progress-fill {
     height: 100%;
     border-radius: 4px;
-    background: linear-gradient(90deg, var(--cyan), var(--purple));
-    box-shadow: 0 0 8px var(--cyan-glow);
-    transition: width 0.6s ease;
+    background: var(--cyan);
+    box-shadow: none;
+    transition: none;
   }
 
   /* Tab bar */
@@ -603,7 +602,7 @@
     color: var(--cyan);
     border-bottom-color: var(--cyan);
     background: rgba(0,212,255,0.05);
-    text-shadow: 0 0 12px var(--cyan-glow);
+    text-shadow: none;
   }
   .tab-btn.locked { opacity: 0.5; cursor: default; }
 
@@ -697,8 +696,8 @@
   .gp-fill {
     height: 100%;
     border-radius: 4px;
-    box-shadow: 0 0 6px var(--cyan-glow);
-    transition: width 0.5s;
+    box-shadow: none;
+    transition: none;
   }
 
   /* Achievements */
@@ -738,7 +737,7 @@
   .ach-badge.earned {
     background: linear-gradient(145deg, rgba(255,215,0,0.12) 0%, rgba(255,184,0,0.06) 100%);
     border-color: rgba(255,215,0,0.5);
-    box-shadow: 0 0 14px rgba(255,215,0,0.2), 0 2px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
   .ach-badge.earned::after {
     content: '';
@@ -1036,7 +1035,7 @@
     font-size: 52px;
     margin-bottom: 10px;
     display: block;
-    filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));
+    filter: none;
   }
   .coach-title {color:var(--cyan);
     font-size: 34px;
@@ -1076,7 +1075,7 @@
   .coach-pay-label { color: var(--sub2); }
   .coach-pay-value { font-weight: 700; color: var(--text); }
   .btn-coach-action {
-    background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+    background: var(--cyan);
     color: #fff;
     font-size: 22px;
     font-weight: 800;
@@ -1133,7 +1132,7 @@
   }
   .coach-msg.from-user {
     align-self: flex-end;
-    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    background: var(--cyan);
     color: #fff;
     border-bottom-right-radius: 4px;
   }
@@ -1170,10 +1169,10 @@
     overflow-y: auto;
     line-height: 1.4;
   }
-  .coach-input:focus { border-color: var(--purple); }
+  .coach-input:focus { border-color: var(--cyan); }
   .coach-input::placeholder { color: var(--sub); }
   .coach-send-btn {
-    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    background: var(--cyan);
     color: #fff;
     border: none;
     border-radius: 12px;
@@ -1210,6 +1209,7 @@
     max-width: 90vw;
     text-align: center;
     backdrop-filter: blur(8px);
+    pointer-events: none;
   }
   .toast.show {
     opacity: 1;
@@ -1243,11 +1243,11 @@
   /* Dream mode accents on cards */
   .dream-active .holding-card:hover { border-left-color: var(--gold); }
   .dream-active .note-card { border-left-color: var(--gold); }
-  .dream-active .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: var(--gold-dim); text-shadow: 0 0 12px var(--gold-glow); }
-  .dream-active .rank-progress-fill { background: linear-gradient(90deg, var(--gold2), var(--gold)); box-shadow: 0 0 8px var(--gold-glow); }
+  .dream-active .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: var(--gold-dim); text-shadow: none; }
+  .dream-active .rank-progress-fill { background: var(--gold); box-shadow: none; }
   .dream-active .section-title { color: var(--gold); }
   .dream-active .gp-pct { color: var(--gold); }
-  .dream-active .gp-fill { box-shadow: 0 0 6px var(--gold-glow); }
+  .dream-active .gp-fill { box-shadow: none; }
   .dream-active .goals-card { border-top-color: rgba(255,215,0,0.3); }
 
   /* Scrollbar */
@@ -1600,7 +1600,7 @@
   <div class="trade-modal">
     <div class="modal-header">
       <div class="modal-coin">
-        <img src="" id="modal-img" alt="">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="modal-img" alt="">
         <div>
           <div class="modal-coin-name" id="modal-name">Bitcoin</div>
           <div class="modal-coin-price" id="modal-price">$0.00</div>
