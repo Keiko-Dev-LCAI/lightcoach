@@ -1256,6 +1256,42 @@
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--sub); }
 
+  /* Floating "Ask the Coach" bubble */
+  .coach-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 22px;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px 14px 18px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--green) 100%);
+    color: var(--on-accent);
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    cursor: pointer;
+    box-shadow: 0 8px 28px rgba(0,212,255,0.4), 0 2px 8px rgba(0,0,0,0.4);
+    animation: coachFabPulse 2.6s ease-in-out infinite;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .coach-fab:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 36px rgba(0,212,255,0.55), 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .coach-fab:active { transform: translateY(0) scale(0.98); }
+  .coach-fab-icon { font-size: 22px; line-height: 1; }
+  .coach-fab-text { white-space: nowrap; }
+  .coach-fab.hidden { display: none; }
+  @keyframes coachFabPulse {
+    0%, 100% { box-shadow: 0 8px 28px rgba(0,212,255,0.4), 0 2px 8px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 8px 28px rgba(0,212,255,0.4), 0 0 0 8px rgba(0,212,255,0.10), 0 2px 8px rgba(0,0,0,0.4); }
+  }
+
   /* Responsive */
   @media (max-width: 480px) {
     .ob-card { padding: 28px 20px; }
@@ -1263,6 +1299,8 @@
     .banner-value { font-size: 42px; }
     .section-title { font-size: 28px; }
     .achievements-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .coach-fab { right: 14px; bottom: 16px; padding: 12px 18px 12px 15px; font-size: 16px; }
+    .coach-fab-icon { font-size: 20px; }
   }
 </style>
 </head>
@@ -1457,7 +1495,7 @@
     <button class="tab-btn" onclick="showTab('markets', this)">🌐 Markets</button>
     <button class="tab-btn" onclick="showTab('trade', this)">⚡ Trade</button>
     <button class="tab-btn" onclick="showTab('notebook', this)">📓 Notes</button>
-    <button class="tab-btn locked" onclick="showTab('coach', this)">🎓 Coach 🔒</button>
+    <button class="tab-btn locked" id="tab-btn-coach" onclick="showTab('coach', this)">🎓 Coach 🔒</button>
   </div>
 
   <!-- Dashboard -->
@@ -1554,6 +1592,12 @@
     </div>
 
   </div>
+
+  <!-- Floating "Ask the Coach" bubble -->
+  <button class="coach-fab" id="coach-fab" onclick="openCoachFromFab()" aria-label="Ask the AI Coach a question">
+    <span class="coach-fab-icon">💬</span>
+    <span class="coach-fab-text">Ask&nbsp;Coach</span>
+  </button>
 
 </div><!-- app -->
 
@@ -2122,6 +2166,15 @@ function showTab(tab, btnEl) {
   if (tab === 'dashboard') { renderHoldings(); renderGoals(); renderAchievements(); }
   if (tab === 'notebook') renderNotes();
   if (tab === 'coach') initCoach();
+  // Hide the floating "Ask Coach" bubble while the Coach tab is open
+  var _fab = document.getElementById('coach-fab');
+  if (_fab) _fab.classList.toggle('hidden', tab === 'coach');
+}
+
+// Floating bubble → jump straight into the Coach tab
+function openCoachFromFab() {
+  var btn = document.getElementById('tab-btn-coach');
+  showTab('coach', btn);
 }
 
 // ==================== ACCOUNT SWITCHER ====================
