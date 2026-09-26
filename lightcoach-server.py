@@ -129,6 +129,15 @@ def get_db():
             created_at INTEGER DEFAULT (strftime('%s','now'))
         )
     """)
+    # Cloud save so users can resume their paper-trading progress on any device.
+    # Stores only the user's own game state (portfolios, notes, stats), keyed to their wallet.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS progress (
+            wallet     TEXT PRIMARY KEY,
+            state      TEXT NOT NULL,
+            updated_at INTEGER NOT NULL
+        )
+    """)
     conn.commit()
     return conn
 
@@ -279,7 +288,17 @@ class AIVMClient:
         r = req.get(f"{AIVM_GATEWAY}/api/models", timeout=15)
         r.raise_for_status()
         models = r.json().get("models", [])
-        model  = next((m for m in models if m["name"] == "llama3-8b"), models[0] if models else None)
+        # Prefer the upgraded coach model; fall back to llama3-8b, then whatever's available.
+        # Model coverage on Mainnet is thin for big models — the fallback keeps Coach answering
+        # even if no worker is currently serving the preferred model.
+        _prefs = ["qwen3.6:27b", "qwen3.6-27b", "llama3-8b"]
+        model = None
+        for _p in _prefs:
+            model = next((m for m in models if m.get("name") == _p), None)
+            if model:
+                break
+        if not model:
+            model = models[0] if models else None
         if not model:
             raise RuntimeError("No AIVM models available")
         model_id = model["id"]
@@ -521,19 +540,41 @@ def api_lcai_price():
     })
 
 
+TRIAL_DAYS = 7   # one-time free trial per wallet, then $1/month
+
+
 @app.route('/api/lc/subscription/<wallet>')
 def api_subscription(wallet):
     w = wallet.lower().strip()
     if w in PREMIUM_WHITELIST:
         return jsonify({'subscribed': True, 'expires_at': None, 'whitelisted': True})
+    now  = int(time.time())
     conn = get_db()
-    row  = conn.execute('SELECT expires_at FROM subscriptions WHERE wallet = ?', (w,)).fetchone()
+    row  = conn.execute('SELECT expires_at, tx_hash FROM subscriptions WHERE wallet = ?', (w,)).fetchone()
+
+    # First time this wallet has ever connected → grant a one-time free trial.
+    # The row persists after it lapses, so a wallet can never re-trial by reconnecting.
+    if row is None and _valid_wallet(w):
+        trial_expires = now + TRIAL_DAYS * 24 * 60 * 60
+        conn.execute(
+            'INSERT OR IGNORE INTO subscriptions (wallet, expires_at, tx_hash) VALUES (?, ?, ?)',
+            (w, trial_expires, 'trial')
+        )
+        conn.commit()
+        conn.close()
+        return jsonify({
+            'subscribed': True,
+            'expires_at': trial_expires,
+            'trial':      True,
+        })
+
     conn.close()
-    now        = int(time.time())
     subscribed = bool(row and row['expires_at'] and row['expires_at'] > now)
+    is_trial   = bool(subscribed and row and row['tx_hash'] == 'trial')
     return jsonify({
         'subscribed': subscribed,
         'expires_at': row['expires_at'] if row else None,
+        'trial':      is_trial,
     })
 
 
@@ -617,6 +658,62 @@ def api_chat_status():
         'reply':  job.get('reply'),
         'error':  job.get('error'),
     })
+
+
+def _valid_wallet(w):
+    w = (w or "").lower().strip()
+    if len(w) != 42 or not w.startswith("0x"):
+        return None
+    if any(c not in "0123456789abcdef" for c in w[2:]):
+        return None
+    return w
+
+
+MAX_STATE_BYTES = 256 * 1024   # 256 KB — a paper-trading save is a few KB; this is a generous cap
+
+
+@app.route('/api/lc/save-progress', methods=['POST'])
+def api_save_progress():
+    data  = request.json or {}
+    w     = _valid_wallet(data.get('wallet'))
+    state = data.get('state')
+    if not w:
+        return jsonify({'error': 'valid wallet required'}), 400
+    if state is None:
+        return jsonify({'error': 'state required'}), 400
+    # Normalize to a compact JSON string regardless of whether the client sent an object or string.
+    try:
+        state_str = state if isinstance(state, str) else json.dumps(state, separators=(',', ':'))
+    except Exception:
+        return jsonify({'error': 'state not serializable'}), 400
+    if len(state_str.encode('utf-8')) > MAX_STATE_BYTES:
+        return jsonify({'error': 'state too large'}), 413
+    now = int(time.time())
+    conn = get_db()
+    conn.execute(
+        'INSERT OR REPLACE INTO progress (wallet, state, updated_at) VALUES (?, ?, ?)',
+        (w, state_str, now)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'updated_at': now})
+
+
+@app.route('/api/lc/load-progress/<wallet>')
+def api_load_progress(wallet):
+    w = _valid_wallet(wallet)
+    if not w:
+        return jsonify({'error': 'valid wallet required'}), 400
+    conn = get_db()
+    row  = conn.execute('SELECT state, updated_at FROM progress WHERE wallet = ?', (w,)).fetchone()
+    conn.close()
+    if not row:
+        return jsonify({'state': None, 'updated_at': None})
+    try:
+        parsed = json.loads(row['state'])
+    except Exception:
+        parsed = None
+    return jsonify({'state': parsed, 'updated_at': row['updated_at']})
 
 
 if __name__ == '__main__':

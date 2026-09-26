@@ -1272,6 +1272,9 @@
 <div id="onboarding">
   <div class="ob-logo">⚡ LightCoach</div>
   <div class="ob-tagline">Practice trading. Learn real strategies. No real money at risk.</div>
+  <div style="text-align:center;margin:-4px 0 14px;">
+    <button class="help-btn" id="ob-restore-btn" onclick="cloudSyncClick()">☁️ Already have progress? Restore from wallet</button>
+  </div>
 
   <div class="ob-card">
     <div class="ob-step-indicator">
@@ -1410,6 +1413,7 @@
         <button class="acct-btn active" id="btn-primary-acct" onclick="switchAccount('primary')">💼 Primary</button>
         <button class="acct-btn dream" id="btn-dream-acct" onclick="switchAccount('dream')">✨ Dream</button>
       </div>
+      <button class="help-btn" id="cloud-sync-btn" onclick="cloudSyncClick()">☁️ Save</button>
       <button class="help-btn" onclick="openHelp()">ℹ️ How it works</button>
     </div>
   </div>
@@ -1508,6 +1512,7 @@
       <div class="coach-icon">&#x1F393;</div>
       <div class="coach-title">Meet Coach</div>
       <div class="coach-desc">Your personal AI trading coach, powered by Lightchain AI.</div>
+      <div class="coach-desc" style="font-weight:600;">🎁 Connect to start your 7-day free trial — then just $1/month.</div>
       <button class="btn-coach-action" onclick="coachConnectWallet()">&#x1F517; Connect Wallet</button>
       <div class="coach-gate-note">Trust Wallet &#xB7; Lightchain network</div>
     </div>
@@ -1968,10 +1973,12 @@ function finishOnboarding() {
   localStorage.setItem(ACH_KEY, JSON.stringify([]));
   localStorage.setItem(ONBOARD_KEY, 'true');
   startApp();
+  cloudSave();
 }
 
 // ==================== APP INIT ====================
 async function startApp() {
+  window._lcAppStarted = true;
   document.getElementById('onboarding').style.display = 'none';
   const appEl = document.getElementById('app');
   appEl.style.display = 'flex';
@@ -1979,6 +1986,9 @@ async function startApp() {
 
   // Migrate old cc_ keys to lc_ if needed
   migrateOldData();
+
+  // Silently re-link cloud sync if this device already has a wallet connected
+  cloudAutoResume();
 
   // Apply dream-active class on load if needed (currentAccount defaults to 'primary')
   document.getElementById('app').classList.toggle('dream-active', currentAccount === 'dream');
@@ -2396,6 +2406,7 @@ function executeTrade() {
   updatePortfolioBanner();
   renderHoldings();
   renderAchievements();
+  cloudSave();
 }
 
 // ==================== NOTEBOOK ====================
@@ -2410,12 +2421,14 @@ function saveNote() {
   showToast('📝 Note saved!');
   // Check note-taker achievement
   setTimeout(() => checkAchievements(), 100);
+  cloudSave();
 }
 
 function deleteNote(id) {
   const notes = getNotes().filter(n => n.id !== id);
   localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
   renderNotes();
+  cloudSave();
 }
 
 function renderNotes() {
@@ -2476,6 +2489,7 @@ const COACH_MSGS_KEY = 'lc_coach_msgs'; // [{role:'user'|'ai', text}]
 
 let coachWallet     = null;
 let coachSubExpiry  = null;
+let coachIsTrial    = false;
 let coachJobId      = null;
 let coachPollTimer  = null;
 let coachPriceData  = null;
@@ -2580,6 +2594,7 @@ async function _coachCheckSub() {
   const nowSec = Math.floor(Date.now() / 1000);
   if (cached && cached.wallet === coachWallet && cached.expires_at > nowSec + 60) {
     coachSubExpiry = cached.expires_at;
+    coachIsTrial   = !!cached.trial;
     _coachShowChat();
     return;
   }
@@ -2590,7 +2605,8 @@ async function _coachCheckSub() {
     const d = await r.json();
     if (d.subscribed && d.expires_at > nowSec) {
       coachSubExpiry = d.expires_at;
-      localStorage.setItem(COACH_SUB_KEY, JSON.stringify({ wallet: coachWallet, expires_at: d.expires_at }));
+      coachIsTrial   = !!d.trial;
+      localStorage.setItem(COACH_SUB_KEY, JSON.stringify({ wallet: coachWallet, expires_at: d.expires_at, trial: coachIsTrial }));
       _coachShowChat();
     } else {
       await _coachShowPayGate();
@@ -2714,7 +2730,14 @@ function _coachShowChat() {
     const d = new Date(coachSubExpiry * 1000);
     const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const el = document.getElementById('coach-chat-exp');
-    if (el) el.textContent = 'Until ' + label;
+    if (el) {
+      if (coachIsTrial) {
+        const daysLeft = Math.max(0, Math.ceil((coachSubExpiry - Date.now() / 1000) / 86400));
+        el.textContent = '🎁 Free trial · ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + ' left';
+      } else {
+        el.textContent = 'Until ' + label;
+      }
+    }
   }
 
   // Unlock the tab button
@@ -2865,6 +2888,156 @@ function _coachPoll() {
       _coachPoll(); // retry on network blip
     }
   }, 1800);
+}
+
+// ==================== CLOUD SYNC (optional wallet-keyed save/resume) ====================
+// Lets a user save their paper-trading progress to their wallet and pick up where they
+// left off on any device. Fully optional — the app still works with no wallet (localStorage).
+// Independent of the Coach subscription: connecting here does NOT touch the pay flow.
+let cloudWallet = null;
+let _cloudTimer = null;
+const CLOUD_KEYS = [PROFILE_KEY, PRIMARY_KEY, DREAM_KEY, NOTES_KEY, ONBOARD_KEY, STATS_KEY, ACH_KEY, COACH_MSGS_KEY];
+const CLOUD_WALLET_KEY = 'lc_cloud_wallet';
+const CLOUD_TS_KEY     = 'lc_cloud_ts';
+
+function _cloudGather() {
+  const s = {};
+  CLOUD_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) s[k] = v; });
+  return s;
+}
+
+function _cloudApply(state) {
+  if (!state) return;
+  CLOUD_KEYS.forEach(k => {
+    if (state[k] !== undefined && state[k] !== null) {
+      localStorage.setItem(k, typeof state[k] === 'string' ? state[k] : JSON.stringify(state[k]));
+    }
+  });
+}
+
+function updateCloudBadge(mode) {
+  const btn = document.getElementById('cloud-sync-btn');
+  if (!btn) return;
+  if (!cloudWallet) { btn.textContent = '☁️ Save'; return; }
+  const short = cloudWallet.slice(0, 6) + '…' + cloudWallet.slice(-4);
+  btn.textContent = (mode === 'saving') ? '☁️ Saving…' : '☁️ ' + short;
+}
+
+async function _cloudEnsureNetwork() {
+  try {
+    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: LIGHTCHAIN_CHAIN_ID }] });
+  } catch (sw) {
+    if (sw && sw.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: LIGHTCHAIN_CHAIN_ID, chainName: 'Lightchain AI',
+            rpcUrls: ['https://rpc.mainnet.lightchain.ai'],
+            nativeCurrency: { name: 'LCAI', symbol: 'LCAI', decimals: 18 } }]
+        });
+      } catch (e) {}
+    }
+  }
+}
+
+// User tapped the "Save" / "Restore from wallet" button.
+async function cloudSyncClick() {
+  if (cloudWallet) { await _cloudSaveNow(); showToast('☁️ Progress saved'); return; }
+  if (!window.ethereum) {
+    showToast('Open in a wallet browser (or connect in the Coach tab) to save across devices.');
+    return;
+  }
+  try {
+    await _cloudEnsureNetwork();
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!accounts || !accounts.length) return;
+    cloudWallet = accounts[0].toLowerCase();
+    localStorage.setItem(CLOUD_WALLET_KEY, cloudWallet);
+    updateCloudBadge();
+    await _cloudSyncOnConnect();
+  } catch (e) {
+    if (e && e.code !== 4001) showToast('Wallet connection failed');
+  }
+}
+
+// Silent re-link on app load if the wallet is already authorized on this device.
+async function cloudAutoResume() {
+  const linked = localStorage.getItem(CLOUD_WALLET_KEY);
+  if (!linked || !window.ethereum) return;
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts && accounts.map(a => a.toLowerCase()).includes(linked)) {
+      cloudWallet = linked;
+      updateCloudBadge();
+      await _cloudSyncOnConnect();
+    }
+  } catch (e) {}
+}
+
+// On (re)connect: decide whether the cloud copy or the local copy wins, then converge.
+async function _cloudSyncOnConnect() {
+  let server = null;
+  try {
+    const r = await fetch(COACH_BACKEND + '/api/lc/load-progress/' + cloudWallet);
+    if (r.ok) server = await r.json();
+  } catch (e) {}
+  const localOnboarded = localStorage.getItem(ONBOARD_KEY) === 'true';
+  const localTs = parseInt(localStorage.getItem(CLOUD_TS_KEY) || '0', 10);
+
+  if (server && server.state) {
+    const serverTs = server.updated_at || 0;
+    // Cloud wins if this device has no progress yet, or the cloud copy is newer.
+    if (!localOnboarded || serverTs > localTs) {
+      _cloudApply(server.state);
+      localStorage.setItem(CLOUD_TS_KEY, String(serverTs));
+      showToast('☁️ Progress restored');
+      if (!window._lcAppStarted && localStorage.getItem(ONBOARD_KEY) === 'true') {
+        await startApp();
+      } else {
+        _cloudRerender();
+      }
+      return;
+    }
+  }
+  // Otherwise local is the source of truth → push it up.
+  await _cloudSaveNow();
+  showToast('☁️ Progress saved to your wallet');
+}
+
+function _cloudRerender() {
+  try {
+    updatePortfolioBanner();
+    updateRankDisplay();
+    renderGoals();
+    renderAchievements();
+    renderHoldings();
+    renderMarkets(document.getElementById('market-search-input') ? document.getElementById('market-search-input').value : '');
+    renderTradeList(document.getElementById('trade-search-input') ? document.getElementById('trade-search-input').value : '');
+    renderNotes();
+  } catch (e) {}
+}
+
+// Debounced auto-save — safe to call from any mutation; no-ops when no wallet linked.
+function cloudSave() {
+  if (!cloudWallet) return;
+  clearTimeout(_cloudTimer);
+  _cloudTimer = setTimeout(_cloudSaveNow, 1500);
+}
+
+async function _cloudSaveNow() {
+  if (!cloudWallet) return;
+  updateCloudBadge('saving');
+  try {
+    const r = await fetch(COACH_BACKEND + '/api/lc/save-progress', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: cloudWallet, state: _cloudGather() })
+    });
+    if (r.ok) {
+      const d = await r.json();
+      localStorage.setItem(CLOUD_TS_KEY, String(d.updated_at || Math.floor(Date.now() / 1000)));
+    }
+  } catch (e) {}
+  updateCloudBadge();
 }
 
 // ==================== BOOT ====================
