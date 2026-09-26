@@ -329,6 +329,59 @@
   }
   .help-btn:hover { background: var(--cyan-dim); }
 
+  /* Wallet connection indicator */
+  .wallet-ind-btn {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.35);
+    color: var(--cyan);
+    font-size: 17px;
+    font-weight: 700;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    margin-left: 8px;
+  }
+  .wallet-ind-btn:hover { background: var(--cyan-dim); }
+  .wallet-ind-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,228,168,0.1);
+    border: 1px solid rgba(0,228,168,0.3);
+    border-radius: 20px;
+    height: 34px;
+    padding: 0 4px 0 12px;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  .wallet-ind-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .wallet-ind-addr {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+    font-family: monospace;
+  }
+  .wallet-ind-disc {
+    background: none;
+    border: none;
+    color: var(--sub2);
+    cursor: pointer;
+    font-size: 15px;
+    padding: 2px 7px;
+    border-radius: 50%;
+    line-height: 1;
+    transition: color 0.2s, background 0.2s;
+  }
+  .wallet-ind-disc:hover { color: var(--red); background: var(--red-dim); }
+
   /* ========== HELP MODAL ========== */
   .help-overlay {
     display: none;
@@ -1451,6 +1504,7 @@
         <button class="acct-btn active" id="btn-primary-acct" onclick="switchAccount('primary')">💼 Primary</button>
         <button class="acct-btn dream" id="btn-dream-acct" onclick="switchAccount('dream')">✨ Dream</button>
       </div>
+      <div id="wallet-indicator"></div>
       <button class="help-btn" id="cloud-sync-btn" onclick="cloudSyncClick()">☁️ Save</button>
       <button class="help-btn" onclick="openHelp()">ℹ️ How it works</button>
     </div>
@@ -2031,7 +2085,8 @@ async function startApp() {
   // Migrate old cc_ keys to lc_ if needed
   migrateOldData();
 
-  // Silently re-link cloud sync if this device already has a wallet connected
+  // Initialize wallet indicator immediately, then async-update if a wallet is already linked
+  updateCloudBadge();
   cloudAutoResume();
 
   // Apply dream-active class on load if needed (currentAccount defaults to 'primary')
@@ -2970,10 +3025,25 @@ function _cloudApply(state) {
 
 function updateCloudBadge(mode) {
   const btn = document.getElementById('cloud-sync-btn');
-  if (!btn) return;
-  if (!cloudWallet) { btn.textContent = '☁️ Save'; return; }
-  const short = cloudWallet.slice(0, 6) + '…' + cloudWallet.slice(-4);
-  btn.textContent = (mode === 'saving') ? '☁️ Saving…' : '☁️ ' + short;
+  if (btn) {
+    if (!cloudWallet) btn.textContent = '☁️ Save';
+    else btn.textContent = (mode === 'saving') ? '☁️ Saving…' : '☁️ Save';
+  }
+  const ind = document.getElementById('wallet-indicator');
+  if (!ind) return;
+  if (!cloudWallet) {
+    ind.innerHTML = '<button class="wallet-ind-btn" onclick="cloudSyncClick()">🔗 Connect Wallet</button>';
+  } else {
+    const short = cloudWallet.slice(0, 6) + '…' + cloudWallet.slice(-4);
+    ind.innerHTML = '<div class="wallet-ind-pill"><span class="wallet-ind-dot"></span><span class="wallet-ind-addr">' + short + '</span><button class="wallet-ind-disc" onclick="cloudDisconnect()" title="Disconnect wallet">✕</button></div>';
+  }
+}
+
+function cloudDisconnect() {
+  cloudWallet = null;
+  localStorage.removeItem(CLOUD_WALLET_KEY);
+  updateCloudBadge();
+  showToast('Wallet disconnected');
 }
 
 async function _cloudEnsureNetwork() {
